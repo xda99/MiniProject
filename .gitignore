@@ -1,5 +1,7 @@
 build
 
+/lib
+
 .DS_Store
 # Prerequisites
 *.d
