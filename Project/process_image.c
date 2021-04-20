@@ -8,6 +8,7 @@
 
 #include <process_image.h>
 
+#include <pal.h>
 
 static float distance_cm = 0;
 static uint16_t line_position = IMAGE_BUFFER_SIZE/2;	//middle
@@ -106,7 +107,7 @@ static THD_FUNCTION(CaptureImage, arg) {
     (void)arg;
 
 	//Takes pixels 0 to IMAGE_BUFFER_SIZE of the line 10 + 11 (minimum 2 lines because reasons)
-	po8030_advanced_config(FORMAT_RGB565, 0, 10, IMAGE_BUFFER_SIZE, 2, SUBSAMPLING_X1, SUBSAMPLING_X1);
+	po8030_advanced_config(FORMAT_RGB565, 0, 479, IMAGE_BUFFER_SIZE, 2, SUBSAMPLING_X1, SUBSAMPLING_X1);
 	dcmi_enable_double_buffering();
 	dcmi_set_capture_mode(CAPTURE_ONE_SHOT);
 	dcmi_prepare();
@@ -131,9 +132,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 	uint8_t *img_buff_ptr;
 	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
 	uint16_t lineWidth = 0;
-	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
 
 	bool send_to_computer = true;
 
@@ -148,21 +146,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 			//extracts first 5bits of the first byte
 			//takes nothing from the second byte
 			image[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		}
-
-		//Extract only the red pixels
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-		{
-			red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		}
-		//Extract only the red pixels
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-		{
-			green[i/2] = (uint8_t)img_buff_ptr[i+1]&0xE0 + img_buff_ptr[i+1]&07;
-		}
-		for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-		{
-			blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 		}
 
 		//search for a line in the image and gets its width in pixels
