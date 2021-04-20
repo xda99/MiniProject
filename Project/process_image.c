@@ -11,6 +11,8 @@
 
 static float distance_cm = 0;
 static uint16_t line_position = IMAGE_BUFFER_SIZE/2;	//middle
+static uint16_t lineWidth = 0;
+static uint8_t line_not_found = 0;
 
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
@@ -22,8 +24,10 @@ static BSEMAPHORE_DECL(image_ready_sem, TRUE);
 uint16_t extract_line_width(uint8_t *buffer){
 
 	uint16_t i = 0, begin = 0, end = 0, width = 0;
-	uint8_t stop = 0, wrong_line = 0, line_not_found = 0;
+	uint8_t stop = 0, wrong_line = 0;
 	uint32_t mean = 0;
+
+	line_not_found = 0;
 
 	static uint16_t last_width = PXTOCM/GOAL_DISTANCE;
 
@@ -89,6 +93,7 @@ uint16_t extract_line_width(uint8_t *buffer){
 	}else{
 		last_width = width = (end - begin);
 		line_position = (begin + end)/2; //gives the line position.
+		line_not_found = LINE_FOUND;
 	}
 
 	//sets a maximum width or returns the measured width
@@ -130,7 +135,6 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	uint8_t *img_buff_ptr;
 	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
-	uint16_t lineWidth = 0;
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
@@ -188,6 +192,14 @@ float get_distance_cm(void){
 
 uint16_t get_line_position(void){
 	return line_position;
+}
+
+uint16_t get_line_width(void){
+	return lineWidth;
+}
+
+uint8_t get_line_not_found(void){
+	return line_not_found;
 }
 
 void process_image_start(void){
