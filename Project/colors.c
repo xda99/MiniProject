@@ -43,7 +43,14 @@ bool red(void)
 	{
 		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
 	}
-	return color_detection(red);
+	if(chBSemSignal(&image_ready_sem))
+	{
+		return color_detection(red);
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool green(void)
@@ -53,19 +60,25 @@ bool green(void)
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
-	//Extract only the red pixels
+	//Extract only the green pixels
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0) + ((uint8_t)img_buff_ptr[i]&07);
 	}
-	return color_detection(green);
+	if(chBSemSignal(&image_ready_sem))
+	{
+		return color_detection(green);
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool blue(void)
 {
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t *img_buff_ptr;
-	//Wait until an image has been captured??
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
@@ -73,7 +86,14 @@ bool blue(void)
 	{
 		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 	}
-	return color_detection(blue);
+	if(chBSemSignal(&image_ready_sem))
+	{
+		return color_detection(blue);
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
