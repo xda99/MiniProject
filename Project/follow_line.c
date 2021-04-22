@@ -10,7 +10,9 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
-#define THRESHOLD_CURVE 	290 //number of pixels that define the beginning of a curve
+#define THRESHOLD_CURVE 				290 //number of pixels that define the beginning of a curve
+#define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
+#define ROTATION 						500 //for a 180 degrees rotation
 
 static THD_WORKING_AREA(waLineFollow, 256);
 static THD_FUNCTION(LineFollow, arg) {
@@ -22,8 +24,7 @@ static THD_FUNCTION(LineFollow, arg) {
     //computes the speed to give to the motors
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
-    uint16_t position_right=0;
-    uint16_t position_left=0;
+    uint16_t position=0;
 
     while(1){
         time = chVTGetSystemTime();
@@ -35,31 +36,42 @@ static THD_FUNCTION(LineFollow, arg) {
         	speed_correction = 0;
         	right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
         	left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-        }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //=> virage à droite
-        	chprintf((BaseSequentialStream *)&SD3,"LineWidth = %d\n", get_line_width());
-        	position_right=right_motor_get_pos();
-        	position_left=left_motor_get_pos();
-        	do{
-				right_motor_set_pos(300);
-				left_motor_set_pos(300);
+        }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //right curve
+        	position=right_motor_get_pos();
+			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			do{
 				right_motor_set_speed(speed);
 				left_motor_set_speed(speed);
-        	}while(abs(position_left-left_motor_get_pos())<300);
+        	}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
 
 
-        	//Faire tourner l'e-puck à droite jusqu'à ce qu'il détecte la ligne
+        	//e-puck turns until it detects the line
         	while(get_line_not_found() != LINE_FOUND){
-        	right_motor_set_pos(500);
-        	left_motor_set_pos(500);
+        	right_motor_set_pos(ROTATION);
+        	left_motor_set_pos(ROTATION);
             right_motor_set_speed(-speed);
             left_motor_set_speed(speed);
-            right_motor_get_pos();
-            left_motor_get_pos();
+        	}
+        }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) < 0){ //left curve
+        	position=right_motor_get_pos();
+			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			do{
+				right_motor_set_speed(speed);
+				left_motor_set_speed(speed);
+        	}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
+
+			//e-puck turns until it detects the line
+        	while(get_line_not_found() != LINE_FOUND){
+        	right_motor_set_pos(ROTATION);
+        	left_motor_set_pos(ROTATION);
+            right_motor_set_speed(speed);
+            left_motor_set_speed(-speed);
         	}
         }else{
-		//applies the speed from the PI regulator and the correction for the rotation
-		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+			right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+			left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
         }
 
         //100Hz

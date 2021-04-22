@@ -145,15 +145,15 @@ static THD_FUNCTION(ProcessImage, arg) {
 
     	if(red())
     	{
-    		chprintf((BaseSequentialStream *)&SD3,"red\n");
+    		//chprintf((BaseSequentialStream *)&SD3,"red\n");
     	}
     	if(blue())
     	{
-    		chprintf((BaseSequentialStream *)&SD3,"blue\n");
+    		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
     	}
     	if(green())
     	{
-    		chprintf((BaseSequentialStream *)&SD3,"green\n");
+    		//chprintf((BaseSequentialStream *)&SD3,"green\n");
     	}
 
     	//waits until an image has been captured
@@ -176,10 +176,10 @@ static THD_FUNCTION(ProcessImage, arg) {
 			distance_cm = PXTOCM/lineWidth;
 		}
 
-		if(send_to_computer){
+/*		if(send_to_computer){
 			//sends to the computer the image
-			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
-		}
+			//SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
+		}*/
 		//invert the bool
 		send_to_computer = !send_to_computer;
     }

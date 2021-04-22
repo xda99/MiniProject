@@ -43,13 +43,13 @@ bool red(void)
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		if(red[i/2]>140)
+		if(red[i/2]>110)
 		{
 			compt+=1;
 		}
 	}
 
-	SendUint8ToComputer(red, IMAGE_BUFFER_SIZE);
+	//SendUint8ToComputer(red, IMAGE_BUFFER_SIZE);
 	if(compt>LINE_SIZE)
 	{
 		return true;
@@ -73,14 +73,18 @@ bool green(void)
 	//Extract only the green pixels
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
-		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0) + ((uint8_t)img_buff_ptr[i]&07);
+		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0>>5) + ((uint8_t)img_buff_ptr[i]&07<<3);
+
+		/*chprintf((BaseSequentialStream *)&SD3,"Green =%d\n",green[i/2]);
+		chprintf((BaseSequentialStream *)&SD3," LSB_E=%d\n",((uint8_t)img_buff_ptr[i+1]&0xE0>>4));
+		chprintf((BaseSequentialStream *)&SD3,"MSB_7=%d\n",((uint8_t)img_buff_ptr[i]&07<<3));*/
 		if(green[i/2]>250)
 		{
 			compt+=1;
 		}
 	}
 
-	//SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
+	SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
 
 	if(compt>LINE_SIZE)
 	{
@@ -105,11 +109,12 @@ bool blue(void)
 	{
 		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 
-		if(blue[i/2]>140)
+		if(blue[i/2]>14)
 		{
 			compt+=1;
 		}
 	}
+	//SendUint8ToComputer(blue, IMAGE_BUFFER_SIZE);
 
 	if(compt>LINE_SIZE)
 	{
