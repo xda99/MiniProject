@@ -49,6 +49,7 @@ bool red(void)
 		}
 	}
 
+	SendUint8ToComputer(red, IMAGE_BUFFER_SIZE);
 	if(compt>LINE_SIZE)
 	{
 		return true;
