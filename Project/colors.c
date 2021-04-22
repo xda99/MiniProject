@@ -36,14 +36,28 @@ bool red(void)
 {
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t *img_buff_ptr;
+	uint16_t compt=0;
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 	//Extract only the red pixels
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
+		if(red[i/2]>120)
+		{
+			compt+=1;
+		}
 	}
-	return color_detection(red);
+
+	if(compt>LINE_SIZE)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	//return color_detection(red);
 }
 
 bool green(void)
@@ -64,6 +78,9 @@ bool green(void)
 			compt+=1;
 		}
 	}
+
+	//SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
+
 	if(compt>LINE_SIZE)
 	{
 		return true;
@@ -79,16 +96,30 @@ bool blue(void)
 {
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t *img_buff_ptr;
+	uint16_t compt=0;
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
-	}
-	return color_detection(blue);
-}
 
+		if(blue[i/2]>120)
+		{
+			compt+=1;
+		}
+	}
+
+	if(compt>LINE_SIZE)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+/*
 bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
 {
 	uint16_t compt=0;
@@ -107,4 +138,4 @@ bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
 	{
 		return false;
 	}
-}
+}*/
