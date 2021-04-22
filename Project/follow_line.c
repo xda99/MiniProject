@@ -10,7 +10,7 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
-#define THRESHOLD_CURVE 	270 //number of pixels that define the beginning of a curve
+#define THRESHOLD_CURVE 	290 //number of pixels that define the beginning of a curve
 
 static THD_WORKING_AREA(waLineFollow, 256);
 static THD_FUNCTION(LineFollow, arg) {
@@ -33,7 +33,7 @@ static THD_FUNCTION(LineFollow, arg) {
         if(abs(speed_correction) < ROTATION_THRESHOLD){
         	speed_correction = 0;
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //=> virage à droite
-        	  chprintf((BaseSequentialStream *)&SD3,"LineWidth = %d\n", get_line_width());
+        	 chprintf((BaseSequentialStream *)&SD3,"LineWidth = %d\n", get_line_width());
         }
 
         //applies the speed from the PI regulator and the correction for the rotation
