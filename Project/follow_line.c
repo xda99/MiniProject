@@ -32,13 +32,26 @@ static THD_FUNCTION(LineFollow, arg) {
         //if the line is nearly in front of the camera, don't rotate
         if(abs(speed_correction) < ROTATION_THRESHOLD){
         	speed_correction = 0;
+        	right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+        	left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //=> virage à droite
-        	 chprintf((BaseSequentialStream *)&SD3,"LineWidth = %d\n", get_line_width());
-        }
+        	right_motor_set_pos(300);
+        	left_motor_set_pos(300);
+        	right_motor_set_speed(speed);
+        	left_motor_set_speed(speed);
 
-        //applies the speed from the PI regulator and the correction for the rotation
+        	//Faire tourner l'e-puck à droite jusqu'à ce qu'il détecte la ligne
+        	while(get_line_not_found() != LINE_FOUND){
+        	right_motor_set_pos(500);
+        	left_motor_set_pos(500);
+            right_motor_set_speed(-speed);
+            left_motor_set_speed(speed);
+        	}
+        }else{
+		//applies the speed from the PI regulator and the correction for the rotation
 		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+        }
 
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
