@@ -15,6 +15,6 @@ bool blue(void);
 
 //Detect if there is a significant amount of pixels with the color entered in parameter
 //Return true if so
-bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE]);
+//bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE]);
 
 #endif /* COLORS_H */
