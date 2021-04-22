@@ -22,10 +22,11 @@ static THD_FUNCTION(LineFollow, arg) {
     //computes the speed to give to the motors
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
+    uint16_t position_right=0;
+    uint16_t position_left=0;
 
     while(1){
         time = chVTGetSystemTime();
-        
         //computes a correction factor to let the robot rotate to be in front of the line
         speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
@@ -36,12 +37,15 @@ static THD_FUNCTION(LineFollow, arg) {
         	left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //=> virage à droite
         	chprintf((BaseSequentialStream *)&SD3,"LineWidth = %d\n", get_line_width());
-        	right_motor_set_pos(300);
-        	left_motor_set_pos(300);
-        	right_motor_set_speed(speed);
-        	left_motor_set_speed(speed);
-        	right_motor_get_pos();
-        	left_motor_get_pos();
+        	position_right=right_motor_get_pos();
+        	position_left=left_motor_get_pos();
+        	do{
+				right_motor_set_pos(300);
+				left_motor_set_pos(300);
+				right_motor_set_speed(speed);
+				left_motor_set_speed(speed);
+        	}while(abs(position_left-left_motor_get_pos())<300);
+
 
         	//Faire tourner l'e-puck à droite jusqu'à ce qu'il détecte la ligne
         	while(get_line_not_found() != LINE_FOUND){
