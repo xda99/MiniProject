@@ -10,7 +10,7 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
-#define THRESHOLD_CURVE 	290 //number of pixels that define the beginning of a curve
+#define THRESHOLD_CURVE 	270 //number of pixels that define the beginning of a curve
 
 static THD_WORKING_AREA(waLineFollow, 256);
 static THD_FUNCTION(LineFollow, arg) {

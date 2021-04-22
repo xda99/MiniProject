@@ -129,7 +129,7 @@ static THD_FUNCTION(CaptureImage, arg) {
 }
 
 
-static THD_WORKING_AREA(waProcessImage, 1024);
+static THD_WORKING_AREA(waProcessImage, 2048);
 static THD_FUNCTION(ProcessImage, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -144,9 +144,9 @@ static THD_FUNCTION(ProcessImage, arg) {
 
     while(1){
 
-    /*	if(red()){
+    	if(red()){
     			 chprintf((BaseSequentialStream *)&SD3,"TEEEEESSSSSSSTT\n");
-    		}*/
+    		}
 
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
