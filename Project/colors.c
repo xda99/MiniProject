@@ -12,7 +12,7 @@
 
 #include <colors.h>
 
-#define LINE_SIZE	200
+#define LINE_SIZE	50
 
 /*
 void color(void)
@@ -43,7 +43,7 @@ bool red(void)
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		if(red[i/2]>120)
+		if(red[i/2]>140)
 		{
 			compt+=1;
 		}
@@ -105,7 +105,7 @@ bool blue(void)
 	{
 		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 
-		if(blue[i/2]>120)
+		if(blue[i/2]>140)
 		{
 			compt+=1;
 		}
