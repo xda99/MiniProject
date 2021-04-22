@@ -144,9 +144,18 @@ static THD_FUNCTION(ProcessImage, arg) {
 
     while(1){
 
-    /*	if(red()){
-    			 chprintf((BaseSequentialStream *)&SD3,"TEEEEESSSSSSSTT\n");
-    		}*/
+    	if(red())
+    	{
+    		chprintf((BaseSequentialStream *)&SD3,"rouge\n");
+    	}
+    	if(blue())
+    	{
+    		chprintf((BaseSequentialStream *)&SD3,"bleu\n");
+    	}
+    	if(green())
+    	{
+    		chprintf((BaseSequentialStream *)&SD3,"green\n");
+    	}
 
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
