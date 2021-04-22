@@ -54,7 +54,7 @@ bool green(void)
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
 	//Extract only the red pixels
-	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE)-2 ; i+=2)
+	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0) + ((uint8_t)img_buff_ptr[i]&07);
 	}
@@ -69,7 +69,7 @@ bool blue(void)
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
-	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE)-2 ; i+=2)
+	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 	}
@@ -81,7 +81,7 @@ bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
 	uint16_t compt=0;
 	for(uint16_t i=0; i<IMAGE_BUFFER_SIZE; i+=1)
 	{
-		if(color[i]>115)
+		if(color[i]>120)
 		{
 			compt+=1;
 		}
