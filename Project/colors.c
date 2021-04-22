@@ -10,6 +10,8 @@
 
 #include <pal.h>
 
+#include <colors.h>
+
 #define LINE_SIZE	200
 
 /*
@@ -33,7 +35,9 @@ void color(void)
 bool red(void)
 {
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t *img_buff_ptr;
 
+	img_buff_ptr = dcmi_get_last_image_ptr();
 	//Extract only the red pixels
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
@@ -45,6 +49,9 @@ bool red(void)
 bool green(void)
 {
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t *img_buff_ptr;
+
+	img_buff_ptr = dcmi_get_last_image_ptr();
 
 	//Extract only the red pixels
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
@@ -57,6 +64,10 @@ bool green(void)
 bool blue(void)
 {
 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t *img_buff_ptr;
+	//Wait until an image has been captured??
+
+	img_buff_ptr = dcmi_get_last_image_ptr();
 
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
@@ -77,5 +88,9 @@ uint16_t color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
 	if(compt>LINE_SIZE)
 	{
 		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
