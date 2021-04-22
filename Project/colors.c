@@ -43,14 +43,7 @@ bool red(void)
 	{
 		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
 	}
-	if(chBSemSignal(&image_ready_sem))
-	{
-		return color_detection(red);
-	}
-	else
-	{
-		return false;
-	}
+	return color_detection(red);
 }
 
 bool green(void)
@@ -58,21 +51,28 @@ bool green(void)
 	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
 	uint8_t *img_buff_ptr;
 
+	uint16_t compt=0;
+
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
 	//Extract only the green pixels
 	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
 	{
 		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0) + ((uint8_t)img_buff_ptr[i]&07);
+		if(green[i/2]>250)
+		{
+			compt+=1;
+		}
 	}
-	if(chBSemSignal(&image_ready_sem))
+	if(compt>LINE_SIZE)
 	{
-		return color_detection(green);
+		return true;
 	}
 	else
 	{
 		return false;
 	}
+
 }
 
 bool blue(void)
@@ -86,14 +86,7 @@ bool blue(void)
 	{
 		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 	}
-	if(chBSemSignal(&image_ready_sem))
-	{
-		return color_detection(blue);
-	}
-	else
-	{
-		return false;
-	}
+	return color_detection(blue);
 }
 
 bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
