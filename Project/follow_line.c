@@ -32,9 +32,11 @@ static THD_FUNCTION(LineFollow, arg) {
         //if the line is nearly in front of the camera, don't rotate
         if(abs(speed_correction) < ROTATION_THRESHOLD){
         	speed_correction = 0;
+        }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //=> virage à droite
+        	  chprintf((BaseSequentialStream *)&SD3,"LineWidth = %d\n", get_line_width());
         }
+
         //applies the speed from the PI regulator and the correction for the rotation
-        chprintf((BaseSequentialStream *)&SD3,"TEEEEESSSSSSSTT\n");
 		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 

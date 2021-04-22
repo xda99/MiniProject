@@ -5,6 +5,7 @@
 
 #include <main.h>
 #include <camera/po8030.h>
+#include "colors.h"
 
 #include <process_image.h>
 
@@ -140,7 +141,13 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	bool send_to_computer = true;
 
+
     while(1){
+
+    /*	if(red()){
+    			 chprintf((BaseSequentialStream *)&SD3,"TEEEEESSSSSSSTT\n");
+    		}*/
+
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
 		//gets the pointer to the array filled with the last image in RGB565    
