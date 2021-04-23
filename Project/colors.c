@@ -14,11 +14,6 @@
 
 #define 	LINE_SIZE	50
 
-#define 	RED			1
-#define		GREEN		2
-#define		BLUE		3
-#define		BLACK		4
-
 /*
 void color(void)
 {

@@ -143,19 +143,19 @@ static THD_FUNCTION(ProcessImage, arg) {
 
     while(1){
 
-    	if(get_color()==RED)
+    	if(get_colors()==RED)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"red\n");
     	}
-    	if(get_color()==BLUE)
+    	if(get_colors()==BLUE)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
     	}
-    	if(get_color()==GREEN)
+    	if(get_colors()==GREEN)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"green\n");
     	}
-    	if(get_color()==BLACK)
+    	if(get_colors()==BLACK)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"black\n");
     	}
