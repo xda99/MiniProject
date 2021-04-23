@@ -9,6 +9,8 @@
 #include <motors.h>
 #include <pi_regulator.h>
 #include <process_image.h>
+#include <run_over.h>
+#include <sensors/proximity.h>
 
 //simple PI regulator implementation
 int16_t pi_regulator(float distance, float goal){
@@ -57,14 +59,23 @@ static THD_FUNCTION(PiRegulator, arg) {
         
         //computes the speed to give to the motors
         //distance_cm is modified by the image processing thread
-        speed = pi_regulator(get_distance_cm(), GOAL_DISTANCE);
+
+
+        if(turn_left())
+        {
+        	speed = pi_regulator(get_prox(2), GOAL_DISTANCE);
+        }
+        else
+        {
+        	speed = pi_regulator(get_prox(5), GOAL_DISTANCE);
+        }
         //computes a correction factor to let the robot rotate to be in front of the line
-        speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
+       // speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
         //if the line is nearly in front of the camera, don't rotate
-        if(abs(speed_correction) < ROTATION_THRESHOLD){
-        	speed_correction = 0;
-        }
+     //   if(abs(speed_correction) < ROTATION_THRESHOLD){
+      //  	speed_correction = 0;
+      //  }
 
         //applies the speed from the PI regulator and the correction for the rotation
 		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
