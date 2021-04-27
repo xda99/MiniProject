@@ -17,22 +17,23 @@
 #define WHEEL_RAYON						40 		//mm
 #define PIXEL_SIZE_MM					2.8e-3  //mm
 
-void virage(uint16_t position, bool right)
+void virage(uint16_t position, bool right, uint16_t y)
 {
 	float x=0;
-	float y=0;
+	//float y=0;
 	float angle=0;
 	float hyp=0;
 	//int32_t t=0;
 
 	if(abs(position-left_motor_get_pos())==30)
 	{
-		x=(left_motor_get_pos()-position)*(130.0f/1000.0f); //mm
-		y=(get_line_position())*PIXEL_SIZE_MM;	//mm
+		x=(left_motor_get_pos()-position)*(130.0f/1000.0f); //mm		//POSITION PAS JUSTE
+		//RAJOUTER LA CONDITION SUR L'AVANCEE DE X ET PRENDRE Y DU CODE
+		(double)y=(get_line_position())*PIXEL_SIZE_MM;	//mm
 	}
 
-	angle=sin(y/x);
-	hyp=sqrt(x*x+y*y);
+	angle=sin((double)y/x);
+	hyp=sqrt(x*x+(double)y*(double)y);
 
 	//Speed correction to turn for "angle" on distance
 	do
@@ -77,16 +78,21 @@ static THD_FUNCTION(LineFollow, arg) {
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //right curve
         	right=true;
         	position=right_motor_get_pos();
-			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
-			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+		//	right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+		//	left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+
+			right_motor_set_speed(speed);
+			left_motor_set_speed(speed);
 			do{
-				right_motor_set_speed(speed);
-				left_motor_set_speed(speed);
+				if(abs(position-right_motor_get_pos())==30)
+				{
+					y=get_line_position();
+				}
         	}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
 
         	//e-puck turns until it detects the line
             //while(get_line_not_found() != LINE_FOUND){
-        		virage(position, right);
+        		virage(position, right, y);
         	//}
 		//	while(get_line_not_found() != LINE_FOUND){
 
@@ -102,7 +108,7 @@ static THD_FUNCTION(LineFollow, arg) {
 
 			//e-puck turns until it detects the line
         	//while(get_line_not_found() != LINE_FOUND){
-        		virage(position, right);
+        		virage(position, right,y);
         	//}
 		//	while(get_line_not_found() != LINE_FOUND){
 
