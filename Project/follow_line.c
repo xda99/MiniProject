@@ -21,9 +21,9 @@ void virage(uint16_t position, bool right)
 {
 	uint16_t x=0;
 	uint16_t y=0;
-	int32_t angle=0;
-	int32_t hyp=0;
-	int32_t t=0;
+	double angle=0;
+	double hyp=0;
+	//int32_t t=0;
     int16_t speed = SPEED_EPUCK;
 
 	if(abs(position-left_motor_get_pos())==30)
@@ -36,15 +36,19 @@ void virage(uint16_t position, bool right)
 	hyp=sqrt(x*x+y*y);
 
 	//Speed correction to turn for "angle" on distance
-	if(right)
+	do
 	{
-		 right_motor_set_speed(speed-hyp);
-	}
-	else
-	{
-		left_motor_set_speed(speed-(angle*WHEEL_DISTANCE)/(WHEEL_RAYON*speed));
-	}
-
+		if(right)
+		{
+			 right_motor_set_pos(hyp);
+			 left_motor_set_pos(hyp+2*3.1415*WHEEL_DISTANCE*angle);
+		}
+		else
+		{
+			 left_motor_set_pos(hyp);
+			 right_motor_set_pos(hyp+2*3.1415*WHEEL_DISTANCE*angle);
+		}
+	}while(get_line_not_found() != LINE_FOUND);
 }
 
 
@@ -85,9 +89,9 @@ static THD_FUNCTION(LineFollow, arg) {
             //while(get_line_not_found() != LINE_FOUND){
         		virage(position, right);
         	//}
-			while(get_line_not_found() != LINE_FOUND){
+		//	while(get_line_not_found() != LINE_FOUND){
 
-			}
+			//}
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) < 0){ //left curve
         	position=right_motor_get_pos();
 			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
@@ -101,9 +105,9 @@ static THD_FUNCTION(LineFollow, arg) {
         	//while(get_line_not_found() != LINE_FOUND){
         		virage(position, right);
         	//}
-			while(get_line_not_found() != LINE_FOUND){
+		//	while(get_line_not_found() != LINE_FOUND){
 
-		    }
+		//    }
         }else{
 			right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 			left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
