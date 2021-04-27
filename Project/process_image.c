@@ -150,8 +150,8 @@ static THD_FUNCTION(ProcessImage, arg) {
     	if(color==RED)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"red\n");
-    		right_motor_set_speed(0);
-    		left_motor_set_speed(0);
+    		//right_motor_set_speed(0);
+    		//left_motor_set_speed(0);
     	}
     	if(color==BLUE)
     	{
@@ -160,19 +160,19 @@ static THD_FUNCTION(ProcessImage, arg) {
     	if(color==GREEN)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"green\n");
-    		right_motor_set_speed(SPEED_EPUCK);
-    		left_motor_set_speed(SPEED_EPUCK);
+    		//right_motor_set_speed(SPEED_EPUCK);
+    		//left_motor_set_speed(SPEED_EPUCK);
     	}
     	if(color==YELLOW) // Passage pieton => Ralenti
     	{
     	    //chprintf((BaseSequentialStream *)&SD3,"yellow\n");
-    		position=right_motor_get_pos();
+    		/*position=right_motor_get_pos();
 			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 			do{
 	    		right_motor_set_speed(SPEED_EPUCK-100);
 	    		left_motor_set_speed(SPEED_EPUCK-100);
-			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
+			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);*/
     	}
     	if(color==BLACK)
     	{

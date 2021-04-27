@@ -7,5 +7,6 @@
 
 //start the thread to follow a line
 void line_follow_start(void);
+void virage(void);
 
 #endif /* FOLLOW_LINE_H */
