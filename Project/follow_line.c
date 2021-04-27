@@ -19,16 +19,15 @@
 
 void virage(uint16_t position, bool right)
 {
-	uint16_t x=0;
-	uint16_t y=0;
-	double angle=0;
-	double hyp=0;
+	float x=0;
+	float y=0;
+	float angle=0;
+	float hyp=0;
 	//int32_t t=0;
-    int16_t speed = SPEED_EPUCK;
 
 	if(abs(position-left_motor_get_pos())==30)
 	{
-		x=(left_motor_get_pos()-position)*(130/1000); //mm
+		x=(left_motor_get_pos()-position)*(130.0f/1000.0f); //mm
 		y=(get_line_position())*PIXEL_SIZE_MM;	//mm
 	}
 
@@ -41,18 +40,18 @@ void virage(uint16_t position, bool right)
 		if(right)
 		{
 			 right_motor_set_pos(hyp);
-			 left_motor_set_pos(hyp+2*3.1415*WHEEL_DISTANCE*angle);
+			 left_motor_set_pos(hyp+2.0f*3.1415f*WHEEL_DISTANCE*angle);
 		}
 		else
 		{
 			 left_motor_set_pos(hyp);
-			 right_motor_set_pos(hyp+2*3.1415*WHEEL_DISTANCE*angle);
+			 right_motor_set_pos(hyp+2.0f*3.1415f*WHEEL_DISTANCE*angle);
 		}
 	}while(get_line_not_found() != LINE_FOUND);
 }
 
 
-static THD_WORKING_AREA(waLineFollow, 256);
+static THD_WORKING_AREA(waLineFollow, 2048);
 static THD_FUNCTION(LineFollow, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -94,8 +93,8 @@ static THD_FUNCTION(LineFollow, arg) {
 			//}
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) < 0){ //left curve
         	position=right_motor_get_pos();
-			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
-			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			//right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			//left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 			do{
 				right_motor_set_speed(speed);
 				left_motor_set_speed(speed);
