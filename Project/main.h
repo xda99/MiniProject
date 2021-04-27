@@ -23,7 +23,8 @@ extern "C" {
 #define KP						800.0f
 #define KI 						3.5f	//must not be zero
 #define MAX_SUM_ERROR 			(MOTOR_SPEED_LIMIT/KI)
-#define SPEED_EPUCK				200
+#define SPEED_EPUCK				250
+#define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
 
 /** Robot wide IPC bus. */
 extern messagebus_t bus;

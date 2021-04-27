@@ -6,6 +6,7 @@
 #include <main.h>
 #include <camera/po8030.h>
 #include "colors.h"
+#include <motors.h>
 
 #include <process_image.h>
 
@@ -137,25 +138,43 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	uint8_t *img_buff_ptr;
 	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
+	uint16_t position=0;
 
 	bool send_to_computer = true;
 
 
     while(1){
 
-    	if(get_colors()==RED)
+    	uint8_t color = get_colors();
+
+    	if(color==RED)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"red\n");
+    		right_motor_set_speed(0);
+    		left_motor_set_speed(0);
     	}
-    	if(get_colors()==BLUE)
+    	if(color==BLUE)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
     	}
-    	if(get_colors()==GREEN)
+    	if(color==GREEN)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"green\n");
+    		right_motor_set_speed(SPEED_EPUCK);
+    		left_motor_set_speed(SPEED_EPUCK);
     	}
-    	if(get_colors()==BLACK)
+    	if(color==YELLOW) // Passage pieton => Ralenti
+    	{
+    	    //chprintf((BaseSequentialStream *)&SD3,"yellow\n");
+    		position=right_motor_get_pos();
+			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			do{
+	    		right_motor_set_speed(SPEED_EPUCK-100);
+	    		left_motor_set_speed(SPEED_EPUCK-100);
+			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
+    	}
+    	if(color==BLACK)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"black\n");
     	}
@@ -180,10 +199,10 @@ static THD_FUNCTION(ProcessImage, arg) {
 			distance_cm = PXTOCM/lineWidth;
 		}
 
-/*		if(send_to_computer){
+	if(send_to_computer){
 			//sends to the computer the image
-			//SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
-		}*/
+			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
+		}
 		//invert the bool
 		send_to_computer = !send_to_computer;
     }

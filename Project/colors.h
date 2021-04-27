@@ -25,5 +25,7 @@ uint8_t get_colors(void);
 #define		GREEN		2
 #define		BLUE		3
 #define		BLACK		4
+#define		YELLOW		5
+#define		NO_COLOR	6
 
 #endif /* COLORS_H */

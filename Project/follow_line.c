@@ -11,7 +11,6 @@
 #include <process_image.h>
 
 #define THRESHOLD_CURVE 				290 //number of pixels that define the beginning of a curve
-#define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
 #define ROTATION 						500 //for a 180 degrees rotation
 
 static THD_WORKING_AREA(waLineFollow, 256);
@@ -45,13 +44,12 @@ static THD_FUNCTION(LineFollow, arg) {
 				left_motor_set_speed(speed);
         	}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
 
-
         	//e-puck turns until it detects the line
         	while(get_line_not_found() != LINE_FOUND){
-        	right_motor_set_pos(ROTATION);
-        	left_motor_set_pos(ROTATION);
-            right_motor_set_speed(-speed);
-            left_motor_set_speed(speed);
+        //	right_motor_set_pos(ROTATION);
+        //	left_motor_set_pos(ROTATION);
+            right_motor_set_speed(speed-150);
+            left_motor_set_speed(speed+20);
         	}
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) < 0){ //left curve
         	position=right_motor_get_pos();
@@ -66,8 +64,8 @@ static THD_FUNCTION(LineFollow, arg) {
         	while(get_line_not_found() != LINE_FOUND){
         	right_motor_set_pos(ROTATION);
         	left_motor_set_pos(ROTATION);
-            right_motor_set_speed(speed);
-            left_motor_set_speed(-speed);
+            right_motor_set_speed(speed+20);
+            left_motor_set_speed(speed-150);
         	}
         }else{
 			right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
@@ -82,3 +80,4 @@ static THD_FUNCTION(LineFollow, arg) {
 void line_follow_start(void){
 	chThdCreateStatic(waLineFollow, sizeof(waLineFollow), NORMALPRIO, LineFollow, NULL);
 }
+
