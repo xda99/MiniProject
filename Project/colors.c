@@ -205,7 +205,6 @@ bool blue(void)
 		return false;
 	}
 }
-
 bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
 {
 	uint16_t compt=0;
