@@ -10,55 +10,39 @@
 #include <pi_regulator.h>
 #include <process_image.h>
 
-#define THRESHOLD_CURVE 				290 //number of pixels that define the beginning of a curve
-#define ROTATION 						500 //for a 180 degrees rotation
+#define THRESHOLD_CURVE 				290		//number of pixels that define the beginning of a curve
+#define ROTATION 						500		//for a 180 degrees rotation
 #define TRESHOLD						10
-#define WHEEL_DISTANCE					53 //mm
-#define WHEEL_RAYON						40//mm
+#define WHEEL_DISTANCE					53 		//mm
+#define WHEEL_RAYON						40 		//mm
+#define PIXEL_SIZE_MM					2.8e-3  //mm
 
-
-void virage(void)
+void virage(uint16_t position, bool right)
 {
-	int32_t position=0;
-	int32_t x=0;
-	int32_t y=0;
+	uint16_t x=0;
+	uint16_t y=0;
 	int32_t angle=0;
-	//int32_t hyp=0;
-	bool right=false;
+	int32_t hyp=0;
+	int32_t t=0;
     int16_t speed = SPEED_EPUCK;
 
-	//turn right
-	if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0)
+	if(abs(position-left_motor_get_pos())==30)
 	{
-		position=left_motor_get_pos();
-		right=true;
-	}
-	else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) < 0)
-	{
-		position=left_motor_get_pos();
-	}
-	if((get_line_position()<(3.0/4.0)*IMAGE_BUFFER_SIZE+TRESHOLD) && (get_line_position()>(3.0/4.0)*IMAGE_BUFFER_SIZE-TRESHOLD))
-	{
-		x=left_motor_get_pos()-position;
-		y=(3/4)*IMAGE_BUFFER_SIZE;
-	}
-	else if((get_line_position()<(1.0/4.0)*IMAGE_BUFFER_SIZE+TRESHOLD) && (get_line_position()>(1.0/4.0)*IMAGE_BUFFER_SIZE-TRESHOLD))
-	{
-		x=left_motor_get_pos()-position;
-		y=(1/4)*IMAGE_BUFFER_SIZE;
+		x=(left_motor_get_pos()-position)*(130/1000); //mm
+		y=(get_line_position())*PIXEL_SIZE_MM;	//mm
 	}
 
 	angle=sin(y/x);
-	//hyp=sqrt(x^2+y^2);
+	hyp=sqrt(x*x+y*y);
 
 	//Speed correction to turn for "angle" on distance
 	if(right)
 	{
-		 right_motor_set_speed(speed-(angle*WHEEL_DISTANCE)/WHEEL_RAYON);
+		 right_motor_set_speed(speed-hyp);
 	}
 	else
 	{
-		left_motor_set_speed(speed-(angle*WHEEL_DISTANCE)/WHEEL_RAYON);
+		left_motor_set_speed(speed-(angle*WHEEL_DISTANCE)/(WHEEL_RAYON*speed));
 	}
 
 }
@@ -75,6 +59,7 @@ static THD_FUNCTION(LineFollow, arg) {
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
     uint16_t position=0;
+    bool right=false;
 
     while(1){
         time = chVTGetSystemTime();
@@ -87,6 +72,7 @@ static THD_FUNCTION(LineFollow, arg) {
         	right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
         	left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
         }else if(get_line_width() > THRESHOLD_CURVE && (get_line_position() - (IMAGE_BUFFER_SIZE/2)) > 0){ //right curve
+        	right=true;
         	position=right_motor_get_pos();
 			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
@@ -97,7 +83,7 @@ static THD_FUNCTION(LineFollow, arg) {
 
         	//e-puck turns until it detects the line
             //while(get_line_not_found() != LINE_FOUND){
-        		virage();
+        		virage(position, right);
         	//}
 			while(get_line_not_found() != LINE_FOUND){
 
@@ -113,7 +99,7 @@ static THD_FUNCTION(LineFollow, arg) {
 
 			//e-puck turns until it detects the line
         	//while(get_line_not_found() != LINE_FOUND){
-        		virage();
+        		virage(position, right);
         	//}
 			while(get_line_not_found() != LINE_FOUND){
 
