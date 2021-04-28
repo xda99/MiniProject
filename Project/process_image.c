@@ -138,20 +138,26 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	uint8_t *img_buff_ptr;
 	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
-	uint16_t position=0;
+	//uint16_t position=0;
 
 	bool send_to_computer = true;
 
 
     while(1){
 
-    	uint8_t color = get_colors();
+    	/*uint8_t color = get_colors();
 
     	if(color==RED)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"red\n");
-    		//right_motor_set_speed(0);
-    		//left_motor_set_speed(0);
+
+    		while(get_colors() != GREEN)
+    		{
+    			right_motor_set_speed(0);
+    		    left_motor_set_speed(0);
+    		}
+    		right_motor_set_speed(SPEED_EPUCK);
+    		left_motor_set_speed(SPEED_EPUCK);
     	}
     	if(color==BLUE)
     	{
@@ -172,7 +178,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 			do{
 	    		right_motor_set_speed(SPEED_EPUCK-100);
 	    		left_motor_set_speed(SPEED_EPUCK-100);
-			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);*/
+			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
     	}
     	if(color==BLACK)
     	{
@@ -197,7 +203,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 		//converts the width into a distance between the robot and the camera
 		if(lineWidth){
 			distance_cm = PXTOCM/lineWidth;
-		}
+		}*/
 
 /*	if(send_to_computer){
 			//sends to the computer the image
