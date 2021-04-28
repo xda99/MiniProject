@@ -13,9 +13,14 @@
 #define THRESHOLD_CURVE 				290		//number of pixels that define the beginning of a curve
 #define ROTATION 						500		//for a 180 degrees rotation
 #define TRESHOLD						10
-#define WHEEL_DISTANCE					53 		//mm
 #define WHEEL_RAYON						40 		//mm
 #define PIXEL_SIZE_MM					2.8e-3  //mm
+#define WHEEL_DISTANCE     				53.5f    //mm
+
+
+
+#define POSITION_NOT_REACHED	0
+#define POSITION_REACHED		1
 
 void virage(void)
 {
@@ -99,6 +104,34 @@ void virage(void)
     }
 }
 
+//position_r and position_l in mm
+void position(float distance, int16_t speed)
+{
+	int16_t right_init=right_motor_get_pos();
+
+	do
+	{
+		left_motor_set_speed(speed);
+		right_motor_set_speed(speed);
+	}while(abs(right_init-right_motor_get_pos())*0.13f<distance);
+	left_motor_set_speed(0);
+	right_motor_set_speed(0);
+}
+
+void angle_rotation(float angle, int16_t speed_r)
+{
+	int16_t right_init=right_motor_get_pos();
+	int16_t left_init=left_motor_get_pos();
+	do
+	{
+		left_motor_set_speed(speed_r);
+		right_motor_set_speed(-speed_r);
+	}while(((float)abs(right_init-right_motor_get_pos())*0.13f <(WHEEL_DISTANCE/2)*angle) && ((float)abs(left_init-left_motor_get_pos())*0.13f <WHEEL_DISTANCE*angle/2));
+
+	left_motor_set_speed(0);
+	right_motor_set_speed(0);
+}
+
 
 static THD_WORKING_AREA(waLineFollow, 2048);
 static THD_FUNCTION(LineFollow, arg) {
@@ -110,7 +143,7 @@ static THD_FUNCTION(LineFollow, arg) {
     while(1){
         time = chVTGetSystemTime();
       
-        virage();
+      //  virage();
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
