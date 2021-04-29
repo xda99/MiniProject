@@ -54,12 +54,8 @@ int main(void)
 	motors_init();
 
 	//stars the threads for the pi regulator and the processing of the image
-	//process_image_start();
-	//line_follow_start();
-	float x=0;
-
-	x=atan(20.0f);
-	chprintf((BaseSequentialStream *)&SD3,"x = %d \n", x);
+	process_image_start();
+	line_follow_start();
 
     /* Infinite loop. */
     while (1) {

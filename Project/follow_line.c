@@ -30,8 +30,10 @@ static bool begin_movement=true;
 //position_r and position_l in mm
 void position(float distance, int16_t speed)
 {
+	//chprintf((BaseSequentialStream *)&SD3,"position\n");
 	if(begin_movement)
 	{
+		//chprintf((BaseSequentialStream *)&SD3,"Reset mot_pos\n");
 		right_motor_set_pos(0);
 		left_motor_set_pos(0);
 		begin_movement=false;
@@ -42,8 +44,8 @@ void position(float distance, int16_t speed)
 	if(right_motor_get_pos()*0.13f>distance)
 	{
 		position_done=true;
-		left_motor_set_speed(0);
-		right_motor_set_speed(0);
+		//left_motor_set_speed(0);
+		//right_motor_set_speed(0);
 	}
 	if(position_done)
 	{
@@ -54,13 +56,11 @@ void position(float distance, int16_t speed)
 
 void angle_rotation(float angle, int16_t speed_r)
 {
-	right_motor_set_pos(0);
-	left_motor_set_pos(0);
 	left_motor_set_speed(speed_r);
 	right_motor_set_speed(-speed_r);
 
 	if(begin_movement)
-	{
+	{ 	chprintf((BaseSequentialStream *)&SD3,"Reset mot_rot\n");
 		right_motor_set_pos(0);
 		left_motor_set_pos(0);
 		begin_movement=false;
@@ -69,8 +69,8 @@ void angle_rotation(float angle, int16_t speed_r)
 	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*angle) && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*angle/2))
 	{
 		rotation_done=true;
-		left_motor_set_speed(0);
-		right_motor_set_speed(0);
+		//left_motor_set_speed(0);
+	//	right_motor_set_speed(0);
 	}
 	if(rotation_done)
 	{
@@ -102,10 +102,12 @@ void virage(void)
     }
     else if((get_line_width() > THRESHOLD_CURVE && speed_correction > 0) || turn) //right curve
     { 
+    	//chprintf((BaseSequentialStream *)&SD3,"virage\n");
     	turn=true;
-    	position((float)THRESHOLD_CURVE, SPEED_EPUCK);
+    	position((float)CAMERA__DISTANCE_CORRECTION	, SPEED_EPUCK);
+    	//chprintf((BaseSequentialStream *)&SD3,"Apres position\n");
 
-		if(right_motor_get_pos()==30)
+		if(right_motor_get_pos()==10)
 		{
 			x=left_motor_get_pos()*0.13f; //mm
 			y=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2))*PIXEL_SIZE_MM;	//mm
@@ -114,6 +116,7 @@ void virage(void)
 
     	if(position_done)
     	{
+    		chprintf((BaseSequentialStream *)&SD3,"Position done\n");
     		position_done=false;
     		//Useless
 			right_motor_set_speed(speed);
@@ -129,14 +132,16 @@ void virage(void)
 //Rajouter bool pour faire set(0)
 		if(rotation_done)
 		{
+			chprintf((BaseSequentialStream *)&SD3,"Angle done\n");
 			rotation_done=false;
 
 			begin_movement=false;
 			position(hyp, speed);
 		}
 
-		if(get_line_not_found() == LINE_FOUND)
+		if(get_line_not_found() == LINE_FOUND && abs(get_line_position-IMAGE_BUFFER_SIZE/2)<20)
 		{
+			chprintf((BaseSequentialStream *)&SD3,"Valentin\n");
 			turn=false;
 		}
 
@@ -168,7 +173,7 @@ void virage(void)
 		}while(get_line_not_found() != LINE_FOUND);
 		turn=false;
     }*/
-    else
+    else if(!turn)
     {
 		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 		left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
@@ -187,7 +192,15 @@ static THD_FUNCTION(LineFollow, arg) {
     while(1){
         time = chVTGetSystemTime();
       
-        //virage();
+        virage();
+        if(position_done)
+        {
+        	chprintf((BaseSequentialStream *)&SD3,"Youpie\n");
+        }
+        if(rotation_done)
+	   {
+		chprintf((BaseSequentialStream *)&SD3,"HIHIHI\n");
+	   }
         //100Hz
         chThdSleepUntilWindowed(time, time + MS2ST(10));
     }
