@@ -20,57 +20,55 @@
 
 #include <run_over.h>
 
+#include <follow_line.h>
+
 #define RIGHT	SPEED_EPUCK
 #define	LEFT	- SPEED_EPUCK
 
-void run_over(void)
+static bool obstacle=false;
+
+void go_along(void)
 {
+	bool left=false;
 
-    //Thread for the IR distance sensor
-    proximity_start();
-
-   //Thread for the claxon!
-   // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
-   // setSoundFileVolume(VOLUME_MAX);
-    playMelodyStart();					//Pour faire une mélodie depuis le code
-
-
-
-    // - IR0 (front-right) + IR4 (back-left)
-    // - IR1 (front-right-45deg) + IR5 (left)
-    // - IR2 (right) + IR6 (front-left-45deg)
-    // - IR3 (back-right) + IR7 (front-left)
-    if((get_prox(0) && get_prox(7))<10)
-    {
-        playNote(440, 1000);
+	playNote(440, 1000);
 
 //       do
 //       {
 
+	left=turn_left();
 
-		if(turn_left())
+	if(left)
+	{
+		rotation(LEFT);
+	}
+	else
+	{
+		rotation(RIGHT);
+	}
+
+	if(get_prox(2)<15 || get_prox(5)<15)
+	{
+		while(get_colors()!=BLACK)
 		{
-			rotation(LEFT);
+			if(left)
+			{
+			//	pi_regulator(15.0f, get_prox(2));
+			}
+			else
+			{
+			//	pi_regulator(15.0f, get_prox(5));
+			}
 		}
-		else
-		{
-			rotation(RIGHT);
-		}
-		if((get_prox(2) || get_prox(5))< 15)
-		{
-			//Stop de tourner
-		}
+
+	}
+	 obstacle=false;
 //        }
 //        while((get_prox(2) || get_prox(5))< 15);
 
-        	//Régulateur pour qu'il reste à distance en contournant
-        }
-     //   while(get_color()!=BLACK);
-    if(get_colors()==BLACK)
-    {
-    	//Stopper le thread de regulateur
-	}
+		//Régulateur pour qu'il reste à distance en contournant
 }
+     //   while(get_color()!=BLACK);
 
 void rotation(int16_t direction)
 {
@@ -89,3 +87,58 @@ bool turn_left(void)
 		return false;
 	}
 }
+/*
+void go_along(void)
+{
+	int16_t err=0;
+	if(turn_left())
+	{
+
+	}
+	else
+	{
+
+	}
+}
+*/
+
+static THD_WORKING_AREA(waSkirt, 256);
+static THD_FUNCTION(Skirt, arg) {
+
+    chRegSetThreadName(__FUNCTION__);
+    (void)arg;
+
+
+    //Thread for the IR distance sensor
+    proximity_start();
+
+   //Thread for the claxon!
+   // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
+   // setSoundFileVolume(VOLUME_MAX);
+    playMelodyStart();					//Pour faire une mélodie depuis le code
+    pi_regulator_start();
+
+
+    // - IR0 (front-right) + IR4 (back-left)
+    // - IR1 (front-right-45deg) + IR5 (left)
+    // - IR2 (right) + IR6 (front-left-45deg)
+    // - IR3 (back-right) + IR7 (front-left)
+
+    while(1)
+    {
+    	 if(get_prox(0)<10 && get_prox(7)<10)
+    	 {
+    		 obstacle=true;
+    	 }
+    	 if(obstacle)
+    	 {
+    		 go_along();
+    	 }
+
+    }
+}
+
+void skirt_start(void){
+	chThdCreateStatic(waSkirt, sizeof(waSkirt), NORMALPRIO, Skirt, NULL);
+}
+
