@@ -149,7 +149,7 @@ static THD_FUNCTION(ProcessImage, arg) {
 
     	if(color==RED)
     	{
-    		chprintf((BaseSequentialStream *)&SD3,"red\n");
+    		//chprintf((BaseSequentialStream *)&SD3,"red\n");
 
     		while(get_colors() != GREEN)
     		{
@@ -161,11 +161,11 @@ static THD_FUNCTION(ProcessImage, arg) {
     	}
     	if(color==BLUE)
     	{
-    		chprintf((BaseSequentialStream *)&SD3,"blue\n");
+    		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
     	}
     	if(color==GREEN)
     	{
-    		chprintf((BaseSequentialStream *)&SD3,"green\n");
+    		//chprintf((BaseSequentialStream *)&SD3,"green\n");
     		//right_motor_set_speed(SPEED_EPUCK);
     		//left_motor_set_speed(SPEED_EPUCK);
     	}
