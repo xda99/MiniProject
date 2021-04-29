@@ -45,6 +45,8 @@ void virage(void)
     }
     else if(get_line_width() > THRESHOLD_CURVE && speed_correction > 0) //right curve
     { 
+    	distance(THRESHOLD_CURVE, SPEED_EPUCK);
+
     	chprintf((BaseSequentialStream *)&SD3,"Right");
     	position=right_motor_get_pos();
 		//	right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
@@ -52,21 +54,19 @@ void virage(void)
 
 		right_motor_set_speed(speed);
 		left_motor_set_speed(speed);
-		do{
 			if(abs(position-right_motor_get_pos())==30)
 			{
 				x=abs(left_motor_get_pos()-position)*(130.0f/1000.0f); //mm
 				y=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2))*PIXEL_SIZE_MM;	//mm
 			}
-    	}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
 
 		angle=atan(y/x);
 		hyp=sqrt(x*x+y*y);
 
 		do
 		{
-			 right_motor_set_speed(speed-2*speed_correction);
-			 left_motor_set_speed(speed+2*speed_correction);
+			angle(angle, speed);
+			position(hyp, speed);
 
 		}while(get_line_not_found() != LINE_FOUND);
     }
@@ -78,14 +78,12 @@ void virage(void)
 		right_motor_set_speed(speed);
 		left_motor_set_speed(speed);
 
-		do{
-			if(abs(position-right_motor_get_pos())==30)
-			{
-				x=abs(left_motor_get_pos()-position)*(130.0f/1000.0f); //mm
-				//RAJOUTER LA CONDITION SUR L'AVANCEE DE X ET PRENDRE Y DU CODE
-				y=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2))*PIXEL_SIZE_MM;	//mm
-			}
-	     }while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
+		if(abs(position-right_motor_get_pos())==30)
+		{
+			x=abs(left_motor_get_pos()-position)*(130.0f/1000.0f); //mm
+			//RAJOUTER LA CONDITION SUR L'AVANCEE DE X ET PRENDRE Y DU CODE
+			y=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2))*PIXEL_SIZE_MM;	//mm
+	     }
 
 		angle=atan(y/x);
 		hyp=sqrt(x*x+y*y);
@@ -93,8 +91,8 @@ void virage(void)
 		//Speed correction to turn for "angle" on distance
 		do
 		{
-			 left_motor_set_speed(speed-2*speed_correction);
-			 right_motor_set_speed(speed+2*speed_correction);
+			angle(angle, -speed);
+			position(hyp, speed);
 		}while(get_line_not_found() != LINE_FOUND);
     }
     else
