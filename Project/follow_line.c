@@ -26,11 +26,17 @@
 static bool turn=false;
 static bool position_done=false;
 static bool rotation_done=false;
-
+static bool begin_movement=true;
 //position_r and position_l in mm
 void position(float distance, int16_t speed)
 {
-	right_motor_set_pos(0);
+	if(begin_movement)
+	{
+		right_motor_set_pos(0);
+		left_motor_set_pos(0);
+		begin_movement=false;
+	}
+
 	left_motor_set_speed(speed);
 	right_motor_set_speed(speed);
 	if(right_motor_get_pos()*0.13f>distance)
@@ -38,6 +44,10 @@ void position(float distance, int16_t speed)
 		position_done=true;
 		left_motor_set_speed(0);
 		right_motor_set_speed(0);
+	}
+	if(position_done)
+	{
+		begin_movement=true;
 	}
 
 }
@@ -49,11 +59,22 @@ void angle_rotation(float angle, int16_t speed_r)
 	left_motor_set_speed(speed_r);
 	right_motor_set_speed(-speed_r);
 
+	if(begin_movement)
+	{
+		right_motor_set_pos(0);
+		left_motor_set_pos(0);
+		begin_movement=false;
+	}
+
 	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*angle) && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*angle/2))
 	{
 		rotation_done=true;
 		left_motor_set_speed(0);
 		right_motor_set_speed(0);
+	}
+	if(rotation_done)
+	{
+		begin_movement=true;
 	}
 }
 
@@ -67,7 +88,8 @@ void virage(void)
     //computes the speed to give to the motors
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
-    bool begin_turn=true;
+
+
 
   	//computes a correction factor to let the robot rotate to be in front of the line
     speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
@@ -82,11 +104,7 @@ void virage(void)
     { 
     	turn=true;
     	position((float)THRESHOLD_CURVE, SPEED_EPUCK);
-    	if(begin_turn)
-    	{
-    		begin_turn=false;
-    		right_motor_set_pos(0);
-    	}
+
 		if(right_motor_get_pos()==30)
 		{
 			x=left_motor_get_pos()*0.13f; //mm
@@ -97,27 +115,29 @@ void virage(void)
     	if(position_done)
     	{
     		position_done=false;
-
     		//Useless
 			right_motor_set_speed(speed);
 			left_motor_set_speed(speed);
 
 			angle=atan(y/x);
 			hyp=sqrt(x*x+y*y);
+
+    		begin_movement=false;
 			angle_rotation(angle, speed);
     	}
 
-
+//Rajouter bool pour faire set(0)
 		if(rotation_done)
 		{
 			rotation_done=false;
+
+			begin_movement=false;
 			position(hyp, speed);
 		}
 
 		if(get_line_not_found() == LINE_FOUND)
 		{
 			turn=false;
-			begin_turn=true;
 		}
 
     }
