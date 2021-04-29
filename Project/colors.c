@@ -12,10 +12,10 @@
 
 #include <colors.h>
 
-#define 	LINE_SIZE				50
+#define 	LINE_SIZE				100
 #define		THRESHOLD_RED			110
-#define		THRESHOLD_GREEN			22
-#define		THRESHOLD_BLUE			12
+#define		THRESHOLD_GREEN			26
+#define		THRESHOLD_BLUE			16
 #define 	THRESHOLD_BLACK			10
 #define 	THRESHOLD_YELLOW_R		80
 #define 	THRESHOLD_YELLOW_G	 	17
@@ -64,7 +64,7 @@ uint8_t get_colors(void)
 				compt_black+=1;
 			}
 
-			green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0>>5) + ((uint8_t)img_buff_ptr[i]&0x07<<3);
+			green[i/2] = (((uint8_t)img_buff_ptr[i+1]&0xE0)>>5) + (((uint8_t)img_buff_ptr[i]&0x07)<<3);
 
 			if(green[i/2]>THRESHOLD_GREEN)
 			{
@@ -72,6 +72,7 @@ uint8_t get_colors(void)
 			}
 
 			blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
+
 			if(blue[i/2]>THRESHOLD_BLUE)
 			{
 				compt_blue+=1;
