@@ -23,33 +23,38 @@
 #define POSITION_NOT_REACHED	0
 #define POSITION_REACHED		1
 
+static bool turn=false;
+static bool position_done=false;
+static bool rotation_done=false;
 
 //position_r and position_l in mm
 void position(float distance, int16_t speed)
 {
-	int16_t right_init=right_motor_get_pos();
-
-	do
+	right_motor_set_pos(0);
+	left_motor_set_speed(speed);
+	right_motor_set_speed(speed);
+	if(right_motor_get_pos()*0.13f>distance)
 	{
-		left_motor_set_speed(speed);
-		right_motor_set_speed(speed);
-	}while(abs(right_init-right_motor_get_pos())*0.13f<distance);
-	left_motor_set_speed(0);
-	right_motor_set_speed(0);
+		position_done=true;
+		left_motor_set_speed(0);
+		right_motor_set_speed(0);
+	}
+
 }
 
 void angle_rotation(float angle, int16_t speed_r)
 {
-	int16_t right_init=right_motor_get_pos();
-	int16_t left_init=left_motor_get_pos();
-	do
-	{
-		left_motor_set_speed(speed_r);
-		right_motor_set_speed(-speed_r);
-	}while(((float)abs(right_init-right_motor_get_pos())*0.13f <(WHEEL_DISTANCE/2)*angle) && ((float)abs(left_init-left_motor_get_pos())*0.13f <WHEEL_DISTANCE*angle/2));
+	right_motor_set_pos(0);
+	left_motor_set_pos(0);
+	left_motor_set_speed(speed_r);
+	right_motor_set_speed(-speed_r);
 
-	left_motor_set_speed(0);
-	right_motor_set_speed(0);
+	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*angle) && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*angle/2))
+	{
+		rotation_done=true;
+		left_motor_set_speed(0);
+		right_motor_set_speed(0);
+	}
 }
 
 void virage(void)
@@ -62,48 +67,64 @@ void virage(void)
     //computes the speed to give to the motors
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
-    uint16_t pos=0;
+    bool begin_turn=true;
 
   	//computes a correction factor to let the robot rotate to be in front of the line
     speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
     //if the line is nearly in front of the camera, don't rotate
-    if(abs(speed_correction) < ROTATION_THRESHOLD){
+    if((abs(speed_correction) < ROTATION_THRESHOLD) && !turn){
     	speed_correction = 0;
     	right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
     	left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
     }
-    else if(get_line_width() > THRESHOLD_CURVE && speed_correction > 0) //right curve
+    else if((get_line_width() > THRESHOLD_CURVE && speed_correction > 0) || turn) //right curve
     { 
+    	turn=true;
     	position((float)THRESHOLD_CURVE, SPEED_EPUCK);
-
-    	//chprintf((BaseSequentialStream *)&SD3,"Right");
-    	pos=right_motor_get_pos();
-		//	right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
-		//	left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
-
-		right_motor_set_speed(speed);
-		left_motor_set_speed(speed);
-			if(abs(pos-right_motor_get_pos())==30)
-			{
-				x=abs(left_motor_get_pos()-pos)*0.13f; //mm
-				y=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2))*PIXEL_SIZE_MM;	//mm
-			}
-
-		angle=atan(y/x);
-		hyp=sqrt(x*x+y*y);
-
-		do
+    	if(begin_turn)
+    	{
+    		begin_turn=false;
+    		right_motor_set_pos(0);
+    	}
+		if(right_motor_get_pos()==30)
 		{
-			angle_rotation(angle, speed);
-			position(hyp, speed);
+			x=left_motor_get_pos()*0.13f; //mm
+			y=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2))*PIXEL_SIZE_MM;	//mm
+		}
 
-		}while(get_line_not_found() != LINE_FOUND);
+
+    	if(position_done)
+    	{
+    		position_done=false;
+
+    		//Useless
+			right_motor_set_speed(speed);
+			left_motor_set_speed(speed);
+
+			angle=atan(y/x);
+			hyp=sqrt(x*x+y*y);
+			angle_rotation(angle, speed);
+    	}
+
+
+		if(rotation_done)
+		{
+			rotation_done=false;
+			position(hyp, speed);
+		}
+
+		if(get_line_not_found() == LINE_FOUND)
+		{
+			turn=false;
+			begin_turn=true;
+		}
+
     }
-    else if(get_line_width() > THRESHOLD_CURVE && speed_correction < 0) //left curve
+
+   /* else if((get_line_width() > THRESHOLD_CURVE && speed_correction < 0) || turn) //left curve
     { 
     	position((float)THRESHOLD_CURVE, SPEED_EPUCK);
-    	pos=right_motor_get_pos();
 		//right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 		//left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 		right_motor_set_speed(speed);
@@ -125,7 +146,8 @@ void virage(void)
 			angle_rotation(angle, -speed);
 			position(hyp, speed);
 		}while(get_line_not_found() != LINE_FOUND);
-    }
+		turn=false;
+    }*/
     else
     {
 		right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
