@@ -20,8 +20,8 @@
 
 /*messagebus_t bus;
 MUTEX_DECL(bus_lock);
-CONDVAR_DECL(bus_condvar);*/
-
+CONDVAR_DECL(bus_condvar);
+*/
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
@@ -62,15 +62,18 @@ int main(void)
 //	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	//Thread for the IR distance sensor
 //	proximity_start();
+//	calibrate_ir();
 
 	//stars the threads for the pi regulator and the processing of the image
 	process_image_start();
-  	line_follow_start();
-//	color_detection_start();
+	line_follow_start();
+	color_detection_start();
 //	skirt_start();
 
     /* Infinite loop. */
     while (1) {
+
+//    	chprintf((BaseSequentialStream *)&SD3,"Prox= %d\n",get_prox(0));
     	//waits 1 second
         chThdSleepMilliseconds(1000);
     }
