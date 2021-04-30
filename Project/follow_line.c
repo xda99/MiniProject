@@ -16,6 +16,9 @@
 #define WHEEL_DISTANCE					53 //mm
 #define WHEEL_RAYON						40//mm
 
+static bool turn=false;
+static bool right=false;
+static bool begin_turn=false;
 
 static THD_WORKING_AREA(waLineFollow, 2048);
 static THD_FUNCTION(LineFollow, arg) {
@@ -35,40 +38,64 @@ static THD_FUNCTION(LineFollow, arg) {
         speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
         //if the line is nearly in front of the camera, don't rotate
-        if(abs(speed_correction) < ROTATION_THRESHOLD){
+        if((abs(speed_correction) < ROTATION_THRESHOLD) && !turn)
+        {
         	speed_correction = 0;
         	right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
         	left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-        }else if(get_line_width() > THRESHOLD_CURVE) //=>virage
+        }
+        else if(get_line_width() > THRESHOLD_CURVE) //=>virage
         {
-        	right_motor_set_pos(0);
-        	left_motor_set_pos(0);
-			do{
+        	if(!turn)
+        	{
+        		turn=true;
+				right_motor_set_pos(0);
+				left_motor_set_pos(0);
+        	}
+
+        	if(right_motor_get_pos()<CAMERA__DISTANCE_CORRECTION)
+        	{
+        		begin_turn=true;
+        	}
+        	if(!begin_turn)
+        	{
 				right_motor_set_speed(speed);
 				left_motor_set_speed(speed);
+        	}
 
-				if(right_motor_get_pos()==40)
-				{
-					speed_virage_cor=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));
-				}
-        	}while(right_motor_get_pos()<CAMERA__DISTANCE_CORRECTION);
+			if(right_motor_get_pos()==40)
+			{
+				speed_virage_cor=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));
+			}
 //			chprintf((BaseSequentialStream *)&SD3,"right= %d \n",speed_virage_cor);
 
-			if((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0)//right curve
+			if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn && begin_turn)//right curve
+			{
+				right=true;
+			}
+			else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn && begin_turn) //left curve
+			{
+				right=false;
+			}
+			if(right && turn && begin_turn)
 			{
 				right_motor_set_speed(speed-2*speed_virage_cor-80);
 				left_motor_set_speed(speed+2*speed_virage_cor+80);
-				while(get_line_not_found() != LINE_FOUND);
 			}
-			else if((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) //left curve
+			else if(turn && begin_turn)
 			{
 				right_motor_set_speed(speed+2*speed_virage_cor+80);
 				left_motor_set_speed(speed-2*speed_virage_cor-80);
-				while(get_line_not_found() != LINE_FOUND);
+			}
+
+			if(get_line_not_found() != LINE_FOUND)
+			{
+				turn=false;
+				begin_turn=false;
 			}
 
         }
-        else
+        else if(!turn)
         {
 			right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 			left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
