@@ -5,6 +5,7 @@
 
 #include <main.h>
 #include <camera/po8030.h>
+#include <motors.h>
 
 #include <process_image.h>
 
@@ -13,8 +14,8 @@
 #include <colors.h>
 
 #define 	LINE_SIZE				100
-#define		THRESHOLD_RED			110
-#define		THRESHOLD_GREEN			26
+#define		THRESHOLD_RED			140
+#define		THRESHOLD_GREEN			27
 #define		THRESHOLD_BLUE			16
 #define 	THRESHOLD_BLACK			10
 #define 	THRESHOLD_YELLOW_R		80
@@ -83,7 +84,7 @@ uint8_t get_colors(void)
 			}
 		}
 
-	//SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
+//	SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
 
 	if(compt_red>LINE_SIZE)
 	{
@@ -110,6 +111,62 @@ uint8_t get_colors(void)
 		return NO_COLOR;
 	}
 }
+
+static THD_WORKING_AREA(waColorDetection, 2048);
+static THD_FUNCTION(ColorDetection, arg) {
+
+    chRegSetThreadName(__FUNCTION__);
+    (void)arg;
+
+	systime_t time;
+
+    while(1)
+    {
+    	time = chVTGetSystemTime();
+    	uint8_t color = get_colors();
+
+    	if(color==RED)
+    	{
+    		chprintf((BaseSequentialStream *)&SD3,"red\n");
+    		right_motor_set_speed(0);
+    		left_motor_set_speed(0);
+    	}
+    	if(color==GREEN)
+		{
+			chprintf((BaseSequentialStream *)&SD3,"green\n");
+			right_motor_set_speed(SPEED_EPUCK);
+			left_motor_set_speed(SPEED_EPUCK);
+		}
+    	if(color==BLUE)
+    	{
+    		chprintf((BaseSequentialStream *)&SD3,"blue\n");
+    	}
+/*    	if(color==BLACK)
+    	{
+    		//chprintf((BaseSequentialStream *)&SD3,"black\n");
+    	}
+     	if(color==YELLOW) // Passage pieton => Ralenti
+		{
+			//chprintf((BaseSequentialStream *)&SD3,"yellow\n");
+    		position=right_motor_get_pos();
+			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
+			do{
+				right_motor_set_speed(SPEED_EPUCK-100);
+				left_motor_set_speed(SPEED_EPUCK-100);
+			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
+		}	*/
+
+    	 //100Hz
+    	 chThdSleepUntilWindowed(time, time + MS2ST(10));
+    }
+}
+
+void color_detection_start(void)
+{
+	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO+1, ColorDetection, NULL);
+}
+
 /*
 bool red(void)
 {

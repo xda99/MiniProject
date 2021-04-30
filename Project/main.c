@@ -11,10 +11,17 @@
 #include <motors.h>
 #include <camera/po8030.h>
 #include <chprintf.h>
+#include <sensors/proximity.h>
 
 #include <pi_regulator.h>
 #include <process_image.h>
 #include <follow_line.h>
+#include <colors.h>
+
+/*messagebus_t bus;
+MUTEX_DECL(bus_lock);
+CONDVAR_DECL(bus_condvar);*/
+
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
@@ -52,10 +59,15 @@ int main(void)
 	po8030_start();
 	//inits the motors
 	motors_init();
+//	messagebus_init(&bus, &bus_lock, &bus_condvar);
+	//Thread for the IR distance sensor
+//	proximity_start();
 
 	//stars the threads for the pi regulator and the processing of the image
 	process_image_start();
-	line_follow_start();
+  	line_follow_start();
+//	color_detection_start();
+//	skirt_start();
 
     /* Infinite loop. */
     while (1) {

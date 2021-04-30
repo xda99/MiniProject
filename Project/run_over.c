@@ -7,19 +7,12 @@
 #include <audio/audio_thread.h>
 
 #include <chprintf.h>
-
 #include <motors.h>
-
 #include <colors.h>
-
 #include <pi_regulator.h>
-
 #include <main.h>
-
 #include <audio/play_melody.h>
-
 #include <run_over.h>
-
 #include <follow_line.h>
 
 #define RIGHT	SPEED_EPUCK
@@ -108,10 +101,6 @@ static THD_FUNCTION(Skirt, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-
-    //Thread for the IR distance sensor
-    proximity_start();
-
    //Thread for the claxon!
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
    // setSoundFileVolume(VOLUME_MAX);
@@ -126,6 +115,7 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
+    	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_prox(7));
     	 if(get_prox(0)<10 && get_prox(7)<10)
     	 {
     		 obstacle=true;
@@ -134,11 +124,11 @@ static THD_FUNCTION(Skirt, arg) {
     	 {
     		 go_along();
     	 }
-
     }
 }
 
-void skirt_start(void){
+void skirt_start(void)
+{
 	chThdCreateStatic(waSkirt, sizeof(waSkirt), NORMALPRIO, Skirt, NULL);
 }
 

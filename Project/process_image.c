@@ -44,7 +44,7 @@ uint16_t extract_line_width(uint8_t *buffer){
 		wrong_line = 0;
 		//search for a begin
 		while(stop == 0 && i < (IMAGE_BUFFER_SIZE - WIDTH_SLOPE))
-		{ 
+		{
 			//the slope must at least be WIDTH_SLOPE wide and is compared
 		    //to the mean of the image
 		    if(buffer[i] > mean && buffer[i+WIDTH_SLOPE] < mean)
@@ -58,7 +58,7 @@ uint16_t extract_line_width(uint8_t *buffer){
 		if (i < (IMAGE_BUFFER_SIZE - WIDTH_SLOPE) && begin)
 		{
 		    stop = 0;
-		    
+
 		    while(stop == 0 && i < IMAGE_BUFFER_SIZE)
 		    {
 		        if(buffer[i] > mean && buffer[i-WIDTH_SLOPE] < mean)
@@ -138,56 +138,14 @@ static THD_FUNCTION(ProcessImage, arg) {
 
 	uint8_t *img_buff_ptr;
 	uint8_t image[IMAGE_BUFFER_SIZE] = {0};
-	//uint16_t position=0;
 
 	bool send_to_computer = true;
 
-
     while(1){
-
-    	uint8_t color = get_colors();
-
-    	if(color==RED)
-    	{
-    		//chprintf((BaseSequentialStream *)&SD3,"red\n");
-
-    		while(get_colors() != GREEN)
-    		{
-    			right_motor_set_speed(0);
-    		    left_motor_set_speed(0);
-    		}
-    		right_motor_set_speed(SPEED_EPUCK);
-    		left_motor_set_speed(SPEED_EPUCK);
-    	}
-    	if(color==BLUE)
-    	{
-    		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
-    	}
-    	if(color==GREEN)
-    	{
-    		//chprintf((BaseSequentialStream *)&SD3,"green\n");
-    		//right_motor_set_speed(SPEED_EPUCK);
-    		//left_motor_set_speed(SPEED_EPUCK);
-    	}
-    	if(color==YELLOW) // Passage pieton => Ralenti
-    	{
-    	    //chprintf((BaseSequentialStream *)&SD3,"yellow\n");
-    		/*position=right_motor_get_pos();
-			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
-			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
-			do{
-	    		right_motor_set_speed(SPEED_EPUCK-100);
-	    		left_motor_set_speed(SPEED_EPUCK-100);
-			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);*/
-    	}
-    	if(color==BLACK)
-    	{
-    		//chprintf((BaseSequentialStream *)&SD3,"black\n");
-    	}
 
     	//waits until an image has been captured
         chBSemWait(&image_ready_sem);
-		//gets the pointer to the array filled with the last image in RGB565    
+		//gets the pointer to the array filled with the last image in RGB565
 		img_buff_ptr = dcmi_get_last_image_ptr();
 
 		//Extracts only the red pixels
@@ -205,10 +163,10 @@ static THD_FUNCTION(ProcessImage, arg) {
 			distance_cm = PXTOCM/lineWidth;
 		}
 
-/*	if(send_to_computer){
+	if(send_to_computer){
 			//sends to the computer the image
 			SendUint8ToComputer(image, IMAGE_BUFFER_SIZE);
-		}*/
+		}
 		//invert the bool
 		send_to_computer = !send_to_computer;
     }

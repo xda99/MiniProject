@@ -20,6 +20,7 @@
 //Detect which color is present in front of the epuck2
 //Return a define representing the color detected
 uint8_t get_colors(void);
+void color_detection_start(void);
 
 #define 	RED			1
 #define		GREEN		2
