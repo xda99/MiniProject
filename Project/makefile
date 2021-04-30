@@ -14,7 +14,7 @@ CSRC += ./main.c \
 		./process_image.c \
 		./follow_line.c \
 		./colors.c \
-		#./run_over.c \
+		./run_over.c \
 		
 
 #Header folders to include

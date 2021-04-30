@@ -13,7 +13,7 @@
 
 #include <colors.h>
 
-#define 	LINE_SIZE				100
+#define 	LINE_SIZE				40
 #define		THRESHOLD_RED			140
 #define		THRESHOLD_GREEN			27
 #define		THRESHOLD_BLUE			16
@@ -128,8 +128,8 @@ static THD_FUNCTION(ColorDetection, arg) {
     	if(color==RED)
     	{
     		chprintf((BaseSequentialStream *)&SD3,"red\n");
-    		right_motor_set_speed(0);
-    		left_motor_set_speed(0);
+    	/*	right_motor_set_speed(0);
+    		left_motor_set_speed(0);*/
     	}
     	if(color==GREEN)
 		{
