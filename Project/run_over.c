@@ -87,8 +87,9 @@ int16_t pi_regulator(void)
 	//	INT8?
 	int16_t error = 0;
 	int16_t speed = 0;
-
+	static int16_t errord=0;
 	static int16_t sum_error = 0;
+	static systime_t time=0;
 
 	if(left)
 	{
@@ -117,9 +118,11 @@ int16_t pi_regulator(void)
 		sum_error = -MAX_SUM_ERROR;
 	}
 
-	speed = error;//+  sum_error;//KP * error;/* + KI * sum_error*/
+	speed = KP*error+KD*(error-errord)/time;//+  sum_error;//KP * error;/* + KI * sum_error*/
 
 	chprintf((BaseSequentialStream *)&SD3,"Speed=%d\n", speed);
+	errord=error;
+	time = chVTGetSystemTime();
 
     return (int16_t)speed;
 }
@@ -200,7 +203,7 @@ static THD_FUNCTION(Skirt, arg) {
 //				 {
 //					 	chprintf((BaseSequentialStream *)&SD3,"1\n");
 						right_motor_set_speed(SPEED_EPUCK+speed_correction);
-						left_motor_set_speed(SPEED_EPUCK);
+						left_motor_set_speed(SPEED_EPUCK-speed_correction);
 /*				 }
 				 else
 				 {
@@ -211,11 +214,11 @@ static THD_FUNCTION(Skirt, arg) {
 			 }
 			 else
 			 {
-				 speed_correction = abs(IR_VALUE-get_calibrated_prox(5));
+				// speed_correction = abs(IR_VALUE-get_calibrated_prox(5));
 				// if(get_calibrated_prox(7)>get_calibrated_prox(4))
 				// {
 					 //	chprintf((BaseSequentialStream *)&SD3,"speed=%d\n",speed_correction);
-						right_motor_set_speed(SPEED_EPUCK);
+						right_motor_set_speed(SPEED_EPUCK-speed_correction);
 						left_motor_set_speed(SPEED_EPUCK+speed_correction);
 				// }
 				 /*else
@@ -225,15 +228,6 @@ static THD_FUNCTION(Skirt, arg) {
 						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 				 }*/
 			 }
-
-			 if(abs(speed_correction) < CORRECTION_THRESHOLD)
-			 {
-				speed_correction = 0;
-			 }
-
-			 //applies the speed from the PI regulator and the correction for the rotation
-			//right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
-			//left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);					//
     	 }
     }
 }

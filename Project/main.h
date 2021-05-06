@@ -20,8 +20,9 @@ extern "C" {
 #define GOAL_DISTANCE 					10.0f
 #define MAX_DISTANCE 					25.0f
 #define ERROR_THRESHOLD					10
-#define KP								800
+#define KP								3
 #define KI 								3.5	//must not be zero
+#define KD								1
 #define MAX_SUM_ERROR 					(MOTOR_SPEED_LIMIT/KI)
 #define SPEED_EPUCK						250
 #define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
