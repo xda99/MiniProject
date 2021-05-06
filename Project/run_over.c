@@ -81,7 +81,7 @@ void go_along(void)
 	 obstacle=false;
 }
 
-
+//changer le nom
 int16_t pi_regulator(void)
 {
 	//	INT8?
@@ -90,6 +90,7 @@ int16_t pi_regulator(void)
 	static int16_t errord=0;
 	static int16_t sum_error = 0;
 	static systime_t time=0;
+
 
 	if(left)
 	{
@@ -105,6 +106,7 @@ int16_t pi_regulator(void)
 	{
 		return 0;
 	}
+
 
 	sum_error += error;
 
@@ -123,6 +125,11 @@ int16_t pi_regulator(void)
 	chprintf((BaseSequentialStream *)&SD3,"Speed=%d\n", speed);
 	errord=error;
 	time = chVTGetSystemTime();
+
+	if(get_calibrated_prox(1)>IR_VALUE || get_calibrated_prox(6)>IR_VALUE)
+	{
+		speed=0;
+	}
 
     return (int16_t)speed;
 }
@@ -171,7 +178,6 @@ static THD_FUNCTION(Skirt, arg) {
     // - IR2 (right) + IR6 (front-left-45deg)
     // - IR3 (back-right) + IR7 (front-left)
     int16_t speed_correction=0;
-    int16_t speed=0;
 
     while(1)
     {
