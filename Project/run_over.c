@@ -17,7 +17,7 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
-#define 	CORRECTION_THRESHOLD	10
+#define 	CORRECTION_THRESHOLD	25
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;
@@ -28,8 +28,8 @@ void go_along(void)
 	uint16_t prox_left=0;
 	uint16_t prox_right=0;
 	float ds=0.0f;
-	prox_left = (3*get_prox(7) + 5*get_prox(6) + get_prox(5))/9;
-	prox_right = (3*get_prox(0) + 5*get_prox(1) + get_prox(2))/9;
+	prox_left = (3*get_calibrated_prox(7) + 5*get_calibrated_prox(6) + get_calibrated_prox(5))/9;
+	prox_right = (3*get_calibrated_prox(0) + 5*get_calibrated_prox(1) + get_calibrated_prox(2))/9;
 
 	//obstacle on the right side
 	if(prox_right>prox_left)
@@ -67,7 +67,7 @@ void go_along(void)
 		rotation(RIGHT);
 	}
 
-	if((get_prox(2)>60 || get_prox(5)>60) && !obstacle_on_side)
+	if((get_calibrated_prox(2)>60 || get_calibrated_prox(5)>60) && !obstacle_on_side)
 	{
 		obstacle_on_side=true;
 	}
@@ -91,11 +91,11 @@ int16_t pi_regulator(void){
 
 	if(turn_left())
 	{
-		error = get_prox(2)-IR_VALUE;
+		error = get_calibrated_prox(2)-IR_VALUE;
 	}
 	else
 	{
-		error = get_prox(5)-IR_VALUE;
+		error = get_calibrated_prox(5)-IR_VALUE;
 	}
 
 	//disables the PI regulator if the error is to small
@@ -134,7 +134,7 @@ bool turn_left(void)
 {
 	if(obstacle)
 	{
-		if(get_prox(0)>get_prox(7))
+		if(get_calibrated_prox(0)>get_calibrated_prox(7))
 		{
 			return true;
 		}
@@ -159,7 +159,7 @@ static THD_FUNCTION(Skirt, arg) {
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
    // setSoundFileVolume(VOLUME_MAX);
     playMelodyStart();					//Pour faire une mélodie depuis le code
-    pi_regulator_start();
+   // pi_regulator_start();
 
 
     // - IR0 (front-right) + IR4 (back-left)
@@ -171,46 +171,52 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-    	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_prox(7));
-    	 if(get_prox(0)>60 || get_prox(7)>60)
+    	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_calibrated_prox(7));
+    	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
     	 {
     		 obstacle=true;
     	 }
     	 if(obstacle)
     	 {
+    		 if(get_calibrated_prox(0)>2500)
+    		 {
+    			 obstacle_on_side = false;
+    		 }
     		 go_along();
     		 speed=pi_regulator();
 
-
 			 //computes a correction factor to let the robot rotate to be in front of the line
-			 if(turn_left())
+			 if(turn_left() && obstacle_on_side)
 			 {
-				 speed_correction = IR_VALUE-get_prox(2);
-				 if(get_prox(0)>get_prox(3))
+				 speed_correction = abs(IR_VALUE-get_calibrated_prox(2));
+				 if(get_calibrated_prox(0)>get_calibrated_prox(3))
 				 {
-						right_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);
-						left_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
+					 	chprintf((BaseSequentialStream *)&SD3,"1\n");
+						right_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+						left_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 				 }
 				 else
 				 {
-						right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
-						left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);
+					 	chprintf((BaseSequentialStream *)&SD3,"2\n");
+						right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 				 }
 			 }
-			 else
+			 else if(obstacle_on_side)
 			 {
-				 speed_correction = IR_VALUE-get_prox(5);
-				 if(get_prox(7)>get_prox(4))
+				 speed_correction = abs(IR_VALUE-get_calibrated_prox(5));
+				 if(get_calibrated_prox(7)>get_calibrated_prox(4))
 				 {
-						right_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);
-						left_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
+					 	chprintf((BaseSequentialStream *)&SD3,"speed=%d\n",speed_correction);
+						right_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+						left_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 				 }
 				 else
 				 {
-						right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
-						left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);
+					 	chprintf((BaseSequentialStream *)&SD3,"4\n");
+						right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 				 }
-
 			 }
 
 			 //if the line is nearly in front of the camera, don't rotate
@@ -221,7 +227,7 @@ static THD_FUNCTION(Skirt, arg) {
 
 			 //applies the speed from the PI regulator and the correction for the rotation
 			right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
-			left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);
+			left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);					//*/
     	 }
     }
 }

@@ -17,11 +17,15 @@
 #include <process_image.h>
 #include <follow_line.h>
 #include <colors.h>
+#include <run_over.h>
 
-/*messagebus_t bus;
+messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
-*/
+
+
+
+
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
@@ -59,21 +63,26 @@ int main(void)
 	po8030_start();
 	//inits the motors
 	motors_init();
-//	messagebus_init(&bus, &bus_lock, &bus_condvar);
+	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	//Thread for the IR distance sensor
-//	proximity_start();
-//	calibrate_ir();
+	proximity_start();
+	chThdSleepMilliseconds(1000);
+	calibrate_ir();
 
 	//stars the threads for the pi regulator and the processing of the image
 	process_image_start();
-	line_follow_start();
-	color_detection_start();
-//	skirt_start();
+//	line_follow_start();
+//	color_detection_start();
+	skirt_start();
 
     /* Infinite loop. */
     while (1) {
 
-//    	chprintf((BaseSequentialStream *)&SD3,"Prox= %d\n",get_prox(0));
+    	/*chprintf((BaseSequentialStream *)&SD3,"Prox0=%d\n",get_calibrated_prox(0));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox7=%d\n",get_calibrated_prox(7));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox2=%d\n",get_calibrated_prox(2));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox5=%d\n",get_calibrated_prox(5));
+//    	chprintf((BaseSequentialStream *)&SD3,"Prox= %d\n",get_prox(0));*/
     	//waits 1 second
         chThdSleepMilliseconds(1000);
     }

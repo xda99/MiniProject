@@ -21,6 +21,21 @@ static bool turn=false;
 static bool right=false;
 static bool begin_turn=false;
 static bool green=true;
+static bool position_done=false;
+
+//position_r and position_l in mm
+void position(float distance, int16_t speed)
+{
+	left_motor_set_pos(0);
+	left_motor_set_speed(speed);
+	right_motor_set_speed(speed);
+	if(left_motor_get_pos()*0.13f>distance)
+	{
+		left_motor_set_speed(0);
+		right_motor_set_speed(0);
+		position_done=true;
+	}
+}
 
 static THD_WORKING_AREA(waLineFollow, 2048);
 static THD_FUNCTION(LineFollow, arg) {
@@ -37,7 +52,7 @@ static THD_FUNCTION(LineFollow, arg) {
     while(1){
         time = chVTGetSystemTime();
 
-        if(get_colors()==RED)
+      /*  if(get_colors()==RED)
         {
         	green=false;
     		right_motor_set_speed(0);
@@ -48,7 +63,7 @@ static THD_FUNCTION(LineFollow, arg) {
         	green=true;
         }
         if(green)
-        {
+        {*/
 			//computes a correction factor to let the robot rotate to be in front of the line
 			speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
@@ -61,24 +76,28 @@ static THD_FUNCTION(LineFollow, arg) {
 			}
 			else if(get_line_width() > THRESHOLD_CURVE || turn) //=>virage
 			{
-				if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn)//right curve
+				if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn)//Détecte un virage à droite
 				{
 					right=true;
+					chprintf((BaseSequentialStream *)&SD3,"Right\n");
 				}
-				else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn) //left curve
+				else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn) //Détecte un virage à gauche
 				{
 					right=false;
+					chprintf((BaseSequentialStream *)&SD3,"Left\n");
 				}
 				if(!turn)
 				{
 					turn=true;
 					right_motor_set_pos(0);
-					left_motor_set_pos(0);
+					//left_motor_set_pos(0);
+					chprintf((BaseSequentialStream *)&SD3,"Turn\n");
 				}
 
-				if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn)
+				if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn) //Peut commencer à tourner
 				{
 					begin_turn=true;
+					chprintf((BaseSequentialStream *)&SD3,"Begin turn\n");
 				}
 				if(!begin_turn)
 				{
@@ -88,7 +107,7 @@ static THD_FUNCTION(LineFollow, arg) {
 
 				if(right_motor_get_pos()==40)
 				{
-					speed_virage_cor=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));
+					speed_virage_cor=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2)); //Speed correction
 				}
 	//			chprintf((BaseSequentialStream *)&SD3,"right= %d \n",speed_virage_cor);
 
@@ -103,22 +122,32 @@ static THD_FUNCTION(LineFollow, arg) {
 					left_motor_set_speed(speed-2*speed_virage_cor-80);
 				}
 
-				if(get_line_not_found() == LINE_FOUND)
+				if(get_line_not_found() == LINE_FOUND) //Ligne retrouvée
 				{
 					turn=false;
 					begin_turn=false;
+					position_done=false;
+					chprintf((BaseSequentialStream *)&SD3,"Line found\n");
 				}
-
 			}
 			else if(!turn)
 			{
-				right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-				left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+				if((get_line_not_found() != LINE_FOUND) && !position_done)
+				{
+					//position(30, SPEED_EPUCK);
+					right_motor_set_speed(SPEED_EPUCK);
+					left_motor_set_speed(SPEED_EPUCK);
+				}
+				if(get_line_not_found() == LINE_FOUND)
+				{
+					right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
+					left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+				}
 			}
 
 			//100Hz
 			chThdSleepUntilWindowed(time, time + MS2ST(10));
-		}
+		//}
     }
 }
 
