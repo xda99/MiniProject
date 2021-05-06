@@ -21,6 +21,7 @@
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;
+static bool left=false;
 
 /*
 void go_along(void)
@@ -52,8 +53,6 @@ void go_along(void)
 
 void go_along(void)
 {
-	bool left=false;
-
 	//playNote(440, 1000);
 
 	left=turn_left();
@@ -185,7 +184,7 @@ static THD_FUNCTION(Skirt, arg) {
     		 speed_correction=pi_regulator();
 
 			 //computes a correction factor to let the robot rotate to be in front of the line
-			 if(turn_left())
+			 if(left)
 			 {
 //				 speed_correction = abs(IR_VALUE-get_calibrated_prox(2));
 //				 if(get_calibrated_prox(0)>get_calibrated_prox(3))
