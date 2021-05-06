@@ -88,7 +88,7 @@ int16_t pi_regulator(void)
 	int16_t error = 0;
 	int16_t speed = 0;
 
-	static float sum_error = 0;
+	static int16_t sum_error = 0;
 
 	if(turn_left())
 	{
@@ -182,25 +182,25 @@ static THD_FUNCTION(Skirt, arg) {
 
     	 if(obstacle_on_side)
     	 {
-    		 speed=pi_regulator();
+    		 speed_correction=pi_regulator();
 
 			 //computes a correction factor to let the robot rotate to be in front of the line
 			 if(turn_left())
 			 {
-				 speed_correction = abs(IR_VALUE-get_calibrated_prox(2));
-				 if(get_calibrated_prox(0)>get_calibrated_prox(3))
-				 {
-					 	chprintf((BaseSequentialStream *)&SD3,"1\n");
-						right_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-						left_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-				 }
+//				 speed_correction = abs(IR_VALUE-get_calibrated_prox(2));
+//				 if(get_calibrated_prox(0)>get_calibrated_prox(3))
+//				 {
+//					 	chprintf((BaseSequentialStream *)&SD3,"1\n");
+						right_motor_set_speed(SPEED_EPUCK+speed);
+						left_motor_set_speed(SPEED_EPUCK);
+/*				 }
 				 else
 				 {
 					 	chprintf((BaseSequentialStream *)&SD3,"2\n");
 						right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-				 }
-			 }
+				 }*/
+			 }/*
 			 else
 			 {
 				 speed_correction = abs(IR_VALUE-get_calibrated_prox(5));
@@ -221,11 +221,11 @@ static THD_FUNCTION(Skirt, arg) {
 			 if(abs(speed_correction) < CORRECTION_THRESHOLD)
 			 {
 				speed_correction = 0;
-			 }
+			 }*/
 
 			 //applies the speed from the PI regulator and the correction for the rotation
-			right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
-			left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);					//*/
+			//right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
+			//left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);					//*/
     	 }
     }
 }
@@ -234,4 +234,3 @@ void skirt_start(void)
 {
 	chThdCreateStatic(waSkirt, sizeof(waSkirt), NORMALPRIO, Skirt, NULL);
 }
-
