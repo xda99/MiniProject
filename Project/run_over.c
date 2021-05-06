@@ -66,9 +66,10 @@ void go_along(void)
 		rotation(RIGHT);
 	}
 
-	if((get_calibrated_prox(2)>60 || get_calibrated_prox(5)>60) && !obstacle_on_side)
+	if((get_calibrated_prox(2)>IR_VALUE || get_calibrated_prox(5)>IR_VALUE) && !obstacle_on_side)
 	{
 		obstacle_on_side=true;
+		chprintf((BaseSequentialStream *)&SD3,"Obstacle\n");
 	}
 		//REGULATEUR
 		//while(get_colors()!=BLACK)
@@ -89,7 +90,7 @@ int16_t pi_regulator(void)
 
 	static int16_t sum_error = 0;
 
-	if(turn_left())
+	if(left)
 	{
 		error = get_calibrated_prox(2)-IR_VALUE;
 	}
@@ -116,7 +117,9 @@ int16_t pi_regulator(void)
 		sum_error = -MAX_SUM_ERROR;
 	}
 
-	speed = KP * error + KI * sum_error;
+	speed = error;//+  sum_error;//KP * error;/* + KI * sum_error*/
+
+	chprintf((BaseSequentialStream *)&SD3,"Speed=%d\n", speed);
 
     return (int16_t)speed;
 }
@@ -179,6 +182,12 @@ static THD_FUNCTION(Skirt, arg) {
     		 go_along();
     	 }
 
+		if((get_calibrated_prox(2)>IR_VALUE|| get_calibrated_prox(5)>IR_VALUE) && !obstacle_on_side)
+		{
+			obstacle_on_side=true;
+			chprintf((BaseSequentialStream *)&SD3,"Obstacle\n");
+		}
+
     	 if(obstacle_on_side)
     	 {
     		 speed_correction=pi_regulator();
@@ -190,7 +199,7 @@ static THD_FUNCTION(Skirt, arg) {
 //				 if(get_calibrated_prox(0)>get_calibrated_prox(3))
 //				 {
 //					 	chprintf((BaseSequentialStream *)&SD3,"1\n");
-						right_motor_set_speed(SPEED_EPUCK+speed);
+						right_motor_set_speed(SPEED_EPUCK+speed_correction);
 						left_motor_set_speed(SPEED_EPUCK);
 /*				 }
 				 else
@@ -199,32 +208,32 @@ static THD_FUNCTION(Skirt, arg) {
 						right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 				 }*/
-			 }/*
+			 }
 			 else
 			 {
 				 speed_correction = abs(IR_VALUE-get_calibrated_prox(5));
-				 if(get_calibrated_prox(7)>get_calibrated_prox(4))
-				 {
-					 	chprintf((BaseSequentialStream *)&SD3,"speed=%d\n",speed_correction);
-						right_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-						left_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-				 }
-				 else
+				// if(get_calibrated_prox(7)>get_calibrated_prox(4))
+				// {
+					 //	chprintf((BaseSequentialStream *)&SD3,"speed=%d\n",speed_correction);
+						right_motor_set_speed(SPEED_EPUCK);
+						left_motor_set_speed(SPEED_EPUCK+speed_correction);
+				// }
+				 /*else
 				 {
 					 	chprintf((BaseSequentialStream *)&SD3,"4\n");
 						right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
-				 }
+				 }*/
 			 }
 
 			 if(abs(speed_correction) < CORRECTION_THRESHOLD)
 			 {
 				speed_correction = 0;
-			 }*/
+			 }
 
 			 //applies the speed from the PI regulator and the correction for the rotation
 			//right_motor_set_speed(speed - 500 - ROTATION_COEFF * speed_correction);
-			//left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);					//*/
+			//left_motor_set_speed(speed - 500 + ROTATION_COEFF * speed_correction);					//
     	 }
     }
 }
