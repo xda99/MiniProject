@@ -17,7 +17,7 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
-#define 	CORRECTION_THRESHOLD	25
+#define 	CORRECTION_THRESHOLD	10
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;
@@ -82,10 +82,11 @@ void go_along(void)
 }
 
 
-int16_t pi_regulator(void){
-
-	float error = 0;
-	float speed = 0;
+int16_t pi_regulator(void)
+{
+	//	INT8?
+	int16_t error = 0;
+	int16_t speed = 0;
 
 	static float sum_error = 0;
 
@@ -99,8 +100,6 @@ int16_t pi_regulator(void){
 	}
 
 	//disables the PI regulator if the error is to small
-	//this avoids to always move as we cannot exactly be where we want and
-	//the camera is a bit noisy
 	if(abs(error) < ERROR_THRESHOLD)
 	{
 		return 0;
@@ -178,15 +177,15 @@ static THD_FUNCTION(Skirt, arg) {
     	 }
     	 if(obstacle)
     	 {
-    		 if(get_calibrated_prox(0)>2500)
-    		 {
-    			 obstacle_on_side = false;
-    		 }
     		 go_along();
+    	 }
+
+    	 if(obstacle_on_side)
+    	 {
     		 speed=pi_regulator();
 
 			 //computes a correction factor to let the robot rotate to be in front of the line
-			 if(turn_left() && obstacle_on_side)
+			 if(turn_left())
 			 {
 				 speed_correction = abs(IR_VALUE-get_calibrated_prox(2));
 				 if(get_calibrated_prox(0)>get_calibrated_prox(3))
@@ -202,7 +201,7 @@ static THD_FUNCTION(Skirt, arg) {
 						left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 				 }
 			 }
-			 else if(obstacle_on_side)
+			 else
 			 {
 				 speed_correction = abs(IR_VALUE-get_calibrated_prox(5));
 				 if(get_calibrated_prox(7)>get_calibrated_prox(4))
@@ -219,7 +218,6 @@ static THD_FUNCTION(Skirt, arg) {
 				 }
 			 }
 
-			 //if the line is nearly in front of the camera, don't rotate
 			 if(abs(speed_correction) < CORRECTION_THRESHOLD)
 			 {
 				speed_correction = 0;
