@@ -14,6 +14,7 @@
 #include <audio/play_melody.h>
 #include <run_over.h>
 #include <follow_line.h>
+#include <process_image.h>
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
@@ -28,6 +29,8 @@ static bool left=false;
 static bool rotation_done=false;
 static bool position_done=false;
 static bool corner=false;
+static	uint8_t compt=0;
+
 void go_along(void)
 {
 	//playNote(440, 1000);
@@ -52,12 +55,13 @@ void go_along(void)
 }
 void corner_rotation(void)
 {
-	right_motor_set_pos(0);
 	//left_motor_set_pos(0);
-	uint8_t compt=0;
 
 	if(!position_done)
 	{
+		right_motor_set_speed(SPEED_EPUCK);
+		left_motor_set_speed(SPEED_EPUCK);
+
 		if(right_motor_get_pos()*0.13f>DISTANCE)
 		{
 			position_done=true;
@@ -66,14 +70,37 @@ void corner_rotation(void)
 		}
 	}
 
-	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*ANGLE)/* && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*ANGLE/2)*/ && position_done)
+	if(position_done)
 	{
-		rotation_done=true;
-		position_done=false;
+		if(left)
+		{
+			right_motor_set_speed(-SPEED_EPUCK);
+			left_motor_set_speed(SPEED_EPUCK);
+
+			if(((float) right_motor_get_pos()*0.13f>(WHEEL_DISTANCE/2)*ANGLE)/* && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*ANGLE/2)*/)
+			{
+				rotation_done=true;
+				position_done=false;
+				right_motor_set_pos(0);
+			}
+		}
+		else
+		{
+			right_motor_set_speed(SPEED_EPUCK);
+			left_motor_set_speed(-SPEED_EPUCK);
+
+			if(((float) right_motor_get_pos()*0.13f<-(WHEEL_DISTANCE/2)*ANGLE)/* && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*ANGLE/2)*/)
+			{
+				rotation_done=true;
+				position_done=false;
+				right_motor_set_pos(0);
+			}
+		}
 	}
 	if(compt==2)
 	{
 		corner=false;
+		compt=0;
 	}
 }
 /*
@@ -104,11 +131,11 @@ int16_t pi_regulator(void)
 
 	if(left)
 	{
-		error = get_calibrated_prox(2)-IR_VALUE;
+		error = (get_calibrated_prox(2)-IR_VALUE)+(get_calibrated_prox(1)-(IR_VALUE+10)/2);
 	}
 	else
 	{
-		error = get_calibrated_prox(5)-IR_VALUE;
+		error = get_calibrated_prox(5)-IR_VALUE+(get_calibrated_prox(6)-(IR_VALUE+10)/2);
 	}
 
 	//disables the PI regulator if the error is to small
@@ -128,19 +155,19 @@ int16_t pi_regulator(void)
 		sum_error = -MAX_SUM_ERROR;
 	}
 
-	speed = KP*error;	//+KD*(error-errord);	//+  sum_error;//KP * error;/* + KI * sum_error*/
+	speed = KP*error; //+KI * sum_error;  //+KD*(error-errord);	//+  sum_error;//KP * error;/* + KI * sum_error*/
 
-	errord=error;
+//	errord=error;
 //	time = chVTGetSystemTime();
-/*
-	if(left && (get_calibrated_prox(1)>IR_VALUE && get_calibrated_prox(2)<10 && obstacle_on_side))
+
+/*	if(left && (get_calibrated_prox(1)>IR_VALUE && get_calibrated_prox(2)<10 && obstacle_on_side))
 	{
-		chprintf((BaseSequentialStream *)&SD3,"1\n");
+		//chprintf((BaseSequentialStream *)&SD3,"1\n");
 		speed=0;
 	}
 	else if(!left && (get_calibrated_prox(6)>IR_VALUE && get_calibrated_prox(5)<10 && obstacle_on_side))
 	{
-		chprintf((BaseSequentialStream *)&SD3,"2\n");
+		//chprintf((BaseSequentialStream *)&SD3,"2\n");
 		speed=0;
 	}
 */
@@ -172,7 +199,7 @@ bool turn_left(void)
 	}
 }
 
-static THD_WORKING_AREA(waSkirt, 256);
+static THD_WORKING_AREA(waSkirt, 1024);
 static THD_FUNCTION(Skirt, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -193,10 +220,6 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-    	if((get_calibrated_prox(2)<CORNER || get_calibrated_prox(5)<CORNER) && obstacle_on_side)
-    	{
-    		corner=true;
-    	}
     	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_calibrated_prox(7));
     	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
     	 {
@@ -218,38 +241,54 @@ static THD_FUNCTION(Skirt, arg) {
 			 //computes a correction factor to let the robot rotate to be in front of the line
 			 if(left)
 			 {
+/*				 if(get_calibrated_prox(2)<CORNER &&) !corner)
+				{
+					chprintf((BaseSequentialStream *)&SD3,"left\n");
+					corner=true;
+					 right_motor_set_pos(0);
+				}
 			  //chprintf((BaseSequentialStream *)&SD3,"1\n");
 				 if(!corner)
 				 {
+				 														*/
 					 right_motor_set_speed(SPEED_EPUCK+speed_correction);
 					 left_motor_set_speed(SPEED_EPUCK-speed_correction);
-				 }
-				 else
+			 }
+/*				 else
 				 {
 					 corner_rotation();
 				 }
-			 }
+			 }*/
 			 else
 			 {
-				 if(!corner)
+/*				 if(get_calibrated_prox(5)<CORNER && !corner)
 				 {
-					 right_motor_set_speed(SPEED_EPUCK-speed_correction);
-				 	 left_motor_set_speed(SPEED_EPUCK+speed_correction);
+					 chprintf((BaseSequentialStream *)&SD3,"right\n");
+					 corner=true;
+					 right_motor_set_pos(0);
 				 }
+
+				 if(!corner)
+				 {*/
+
+					 right_motor_set_speed(SPEED_EPUCK-speed_correction);
+					 left_motor_set_speed(SPEED_EPUCK+speed_correction);
+
+/*				 }
 
 				 else
 				 {
 					 corner_rotation();
-				 }
+				 }*/
 			 }
 	    }
 	    //Reset tout les bool quand la ligne est retrouvée
-	    if(get_line_not_found()==LINE_FOUND)
+/*	    if(get_line_not_found()==LINE_FOUND)
 	    {
 	    	obstacle=false;
 	    	obstacle_on_side=false;
 	    	corner=false;
-	    }
+	    }*/
     }
 }
 
