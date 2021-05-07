@@ -14,7 +14,6 @@
 #define THRESHOLD_CURVE 				290 //number of pixels that define the beginning of a curve
 #define ROTATION 						500 //for a 180 degrees rotation
 #define TRESHOLD						10
-#define WHEEL_DISTANCE					53 //mm
 #define WHEEL_RAYON						40//mm
 
 static bool turn=false;
@@ -31,8 +30,6 @@ void position(float distance, int16_t speed)
 	right_motor_set_speed(speed);
 	if(left_motor_get_pos()*0.13f>distance)
 	{
-		left_motor_set_speed(0);
-		right_motor_set_speed(0);
 		position_done=true;
 	}
 }

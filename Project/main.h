@@ -27,6 +27,8 @@ extern "C" {
 #define SPEED_EPUCK						250
 #define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
 #define IR_VALUE						120
+#define WHEEL_DISTANCE					53 //mm
+#define LINE_FOUND		2
 /** Robot wide IPC bus. */
 extern messagebus_t bus;
 
