@@ -17,12 +17,17 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
-#define 	CORRECTION_THRESHOLD	10
+#define 	CORNER					10
+#define		ANGLE					1.57
+#define		STEP_TO_MM				0.13f
+#define		DISTANCE				40
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;
 static bool left=false;
-
+static bool rotation_done=false;
+static bool position_done=false;
+static bool corner=false;
 void go_along(void)
 {
 	//playNote(440, 1000);
@@ -45,6 +50,46 @@ void go_along(void)
 	}
 	 obstacle=false;
 }
+void corner_rotation(void)
+{
+	right_motor_set_pos(0);
+	//left_motor_set_pos(0);
+	uint8_t compt=0;
+
+	if(!position_done)
+	{
+		if(right_motor_get_pos()*0.13f>DISTANCE)
+		{
+			position_done=true;
+			right_motor_set_pos(0);
+			compt+=compt;
+		}
+	}
+
+	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*ANGLE)/* && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*ANGLE/2)*/ && position_done)
+	{
+		rotation_done=true;
+		position_done=false;
+	}
+	if(compt==2)
+	{
+		corner=false;
+	}
+}
+/*
+void angle_rotation(float angle, int16_t speed_r)
+{
+	right_motor_set_pos(0);
+	left_motor_set_pos(0);
+	left_motor_set_speed(speed_r);
+	right_motor_set_speed(-speed_r);
+
+	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*angle) && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*angle/2))
+	{
+		//rotation_done=true;
+		corner=false;
+	}
+}*/
 
 //changer le nom
 int16_t pi_regulator(void)
@@ -148,6 +193,10 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
+    	if((get_calibrated_prox(2)<CORNER || get_calibrated_prox(5)<CORNER) && obstacle_on_side)
+    	{
+    		corner=true;
+    	}
     	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_calibrated_prox(7));
     	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
     	 {
@@ -170,14 +219,36 @@ static THD_FUNCTION(Skirt, arg) {
 			 if(left)
 			 {
 			  //chprintf((BaseSequentialStream *)&SD3,"1\n");
-				right_motor_set_speed(SPEED_EPUCK+speed_correction);
-				left_motor_set_speed(SPEED_EPUCK-speed_correction);
+				 if(!corner)
+				 {
+					 right_motor_set_speed(SPEED_EPUCK+speed_correction);
+					 left_motor_set_speed(SPEED_EPUCK-speed_correction);
+				 }
+				 else
+				 {
+					 corner_rotation();
+				 }
 			 }
 			 else
 			 {
-				right_motor_set_speed(SPEED_EPUCK-speed_correction);
-				left_motor_set_speed(SPEED_EPUCK+speed_correction);
+				 if(!corner)
+				 {
+					 right_motor_set_speed(SPEED_EPUCK-speed_correction);
+				 	 left_motor_set_speed(SPEED_EPUCK+speed_correction);
+				 }
+
+				 else
+				 {
+					 corner_rotation();
+				 }
 			 }
+	    }
+	    //Reset tout les bool quand la ligne est retrouvée
+	    if(get_line_not_found()==LINE_FOUND)
+	    {
+	    	obstacle=false;
+	    	obstacle_on_side=false;
+	    	corner=false;
 	    }
     }
 }

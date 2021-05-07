@@ -6,4 +6,5 @@ void run_over(void);
 void rotation(int16_t direction);
 bool turn_left(void);
 int16_t pi_regulator(void);
+void corner_rotation(void);
 #endif /* RUN_OVER_H */
