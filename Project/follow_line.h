@@ -8,6 +8,9 @@ void position(float distance, int16_t speed);
 //start the thread to follow a line
 void line_follow_start(void);
 //void virage(void);
+void virage(void);
+void straight_line(int16_t speed_correction);
+void color_detection(uint8_t color);
 //void angle_rotation(float angle, int16_t speed_r);
 //void position(float distance, int16_t speed);
 

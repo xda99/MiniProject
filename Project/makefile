@@ -14,7 +14,6 @@ CSRC += ./main.c \
 		./follow_line.c \
 		./colors.c \
 		./run_over.c \
-	#	./pi_regulator.c \ 
 		
 
 #Header folders to include

@@ -23,6 +23,19 @@ messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
 
+void angle_rotation(float angle, int16_t speed_r)
+{
+	int16_t right_init=right_motor_get_pos();
+	int16_t left_init=left_motor_get_pos();
+	do
+	{
+		left_motor_set_speed(speed_r);
+		right_motor_set_speed(-speed_r);
+	}while(((float)abs(right_init-right_motor_get_pos())*0.13f <(53/2)*angle) && ((float)abs(left_init-left_motor_get_pos())*0.13f <53*angle/2));
+
+	left_motor_set_speed(0);
+	right_motor_set_speed(0);
+}
 
 
 
@@ -73,15 +86,21 @@ int main(void)
 	process_image_start();
 //	line_follow_start();
 //	color_detection_start();
-	skirt_start();
+//	skirt_start();
 
     /* Infinite loop. */
     while (1) {
 
+    	angle_rotation(1.570796,-SPEED_EPUCK);
+
     	/*chprintf((BaseSequentialStream *)&SD3,"Prox0=%d\n",get_calibrated_prox(0));
-    	chprintf((BaseSequentialStream *)&SD3,"Prox7=%d\n",get_calibrated_prox(7));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox1=%d\n",get_calibrated_prox(1));
     	chprintf((BaseSequentialStream *)&SD3,"Prox2=%d\n",get_calibrated_prox(2));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox3=%d\n",get_calibrated_prox(3));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox4=%d\n",get_calibrated_prox(4));
     	chprintf((BaseSequentialStream *)&SD3,"Prox5=%d\n",get_calibrated_prox(5));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox6=%d\n",get_calibrated_prox(6));
+    	chprintf((BaseSequentialStream *)&SD3,"Prox7=%d\n",get_calibrated_prox(7));
 //    	chprintf((BaseSequentialStream *)&SD3,"Prox= %d\n",get_prox(0));*/
     	//waits 1 second
         chThdSleepMilliseconds(1000);

@@ -112,7 +112,7 @@ uint8_t get_colors(void)
 	}
 }
 
-static THD_WORKING_AREA(waColorDetection, 2048);
+/*static THD_WORKING_AREA(waColorDetection, 2048);
 static THD_FUNCTION(ColorDetection, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -128,8 +128,8 @@ static THD_FUNCTION(ColorDetection, arg) {
     	if(color==RED)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"red\n");
-    	/*	right_motor_set_speed(0);
-    		left_motor_set_speed(0);*/
+    		right_motor_set_speed(0);
+    		left_motor_set_speed(0);
     	}
     	if(color==GREEN)
 		{
@@ -141,7 +141,7 @@ static THD_FUNCTION(ColorDetection, arg) {
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
     	}
-/*    	if(color==BLACK)
+    	if(color==BLACK)
     	{
     		chprintf((BaseSequentialStream *)&SD3,"black\n");
     	}
@@ -155,7 +155,7 @@ static THD_FUNCTION(ColorDetection, arg) {
 				right_motor_set_speed(SPEED_EPUCK-100);
 				left_motor_set_speed(SPEED_EPUCK-100);
 			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
-		}	*/
+		}
 
     	 //100Hz
     	 chThdSleepUntilWindowed(time, time + MS2ST(10));
@@ -166,6 +166,10 @@ void color_detection_start(void)
 {
 	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO+1, ColorDetection, NULL);
 }
+*/
+
+
+
 
 /*
 bool red(void)
