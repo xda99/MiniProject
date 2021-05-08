@@ -9,7 +9,6 @@
 #include <chprintf.h>
 #include <motors.h>
 #include <colors.h>
-#include <pi_regulator.h>
 #include <main.h>
 #include <audio/play_melody.h>
 #include <run_over.h>
@@ -49,85 +48,16 @@ void go_along(void)
 	if((get_calibrated_prox(2)>IR_VALUE || get_calibrated_prox(5)>IR_VALUE) && !obstacle_on_side)
 	{
 		obstacle_on_side=true;
-		//chprintf((BaseSequentialStream *)&SD3,"Obstacle\n");
 	}
 	 obstacle=false;
 }
-void corner_rotation(void)
-{
-	//left_motor_set_pos(0);
 
-	if(!position_done)
-	{
-		right_motor_set_speed(SPEED_EPUCK);
-		left_motor_set_speed(SPEED_EPUCK);
-
-		if(right_motor_get_pos()*0.13f>DISTANCE)
-		{
-			position_done=true;
-			right_motor_set_pos(0);
-			compt+=compt;
-		}
-	}
-
-	if(position_done)
-	{
-		if(left)
-		{
-			right_motor_set_speed(-SPEED_EPUCK);
-			left_motor_set_speed(SPEED_EPUCK);
-
-			if(((float) right_motor_get_pos()*0.13f>(WHEEL_DISTANCE/2)*ANGLE)/* && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*ANGLE/2)*/)
-			{
-				rotation_done=true;
-				position_done=false;
-				right_motor_set_pos(0);
-			}
-		}
-		else
-		{
-			right_motor_set_speed(SPEED_EPUCK);
-			left_motor_set_speed(-SPEED_EPUCK);
-
-			if(((float) right_motor_get_pos()*0.13f<-(WHEEL_DISTANCE/2)*ANGLE)/* && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*ANGLE/2)*/)
-			{
-				rotation_done=true;
-				position_done=false;
-				right_motor_set_pos(0);
-			}
-		}
-	}
-	if(compt==2)
-	{
-		corner=false;
-		compt=0;
-	}
-}
-/*
-void angle_rotation(float angle, int16_t speed_r)
-{
-	right_motor_set_pos(0);
-	left_motor_set_pos(0);
-	left_motor_set_speed(speed_r);
-	right_motor_set_speed(-speed_r);
-
-	if(((float) right_motor_get_pos()*0.13f >(WHEEL_DISTANCE/2)*angle) && ((float) left_motor_get_pos()*0.13f >WHEEL_DISTANCE*angle/2))
-	{
-		//rotation_done=true;
-		corner=false;
-	}
-}*/
-
-//changer le nom
-int16_t pi_regulator(void)
+int16_t regulator(void)
 {
 	//	INT8?
 	int16_t error = 0;
 	int16_t speed = 0;
 	static int16_t errord=0;
-	static int16_t sum_error = 0;
-//	static systime_t time=0;
-
 
 	if(left)
 	{
@@ -144,33 +74,7 @@ int16_t pi_regulator(void)
 		return 0;
 	}
 
-	sum_error += error;
-	//we set a maximum and a minimum for the sum to avoid an uncontrolled growth
-	if(sum_error > MAX_SUM_ERROR)
-	{
-		sum_error = MAX_SUM_ERROR;
-	}
-	else if(sum_error < -MAX_SUM_ERROR)
-	{
-		sum_error = -MAX_SUM_ERROR;
-	}
-
-	speed = KP*error; //+KI * sum_error;  //+KD*(error-errord);	//+  sum_error;//KP * error;/* + KI * sum_error*/
-
-//	errord=error;
-//	time = chVTGetSystemTime();
-
-/*	if(left && (get_calibrated_prox(1)>IR_VALUE && get_calibrated_prox(2)<10 && obstacle_on_side))
-	{
-		//chprintf((BaseSequentialStream *)&SD3,"1\n");
-		speed=0;
-	}
-	else if(!left && (get_calibrated_prox(6)>IR_VALUE && get_calibrated_prox(5)<10 && obstacle_on_side))
-	{
-		//chprintf((BaseSequentialStream *)&SD3,"2\n");
-		speed=0;
-	}
-*/
+	speed = KP*error;
     return (int16_t)speed;
 }
 
@@ -209,7 +113,7 @@ static THD_FUNCTION(Skirt, arg) {
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
    // setSoundFileVolume(VOLUME_MAX);
     playMelodyStart();					//Pour faire une mélodie depuis le code
-   // pi_regulator_start();
+   // regulator_start();
 
 
     // - IR0 (front-right) + IR4 (back-left)
@@ -237,7 +141,7 @@ static THD_FUNCTION(Skirt, arg) {
 
 	    if(obstacle_on_side)
 	    {
-			 speed_correction=pi_regulator();
+			 speed_correction=regulator();
 			 //computes a correction factor to let the robot rotate to be in front of the line
 			 if(left)
 			 {
@@ -283,13 +187,28 @@ static THD_FUNCTION(Skirt, arg) {
 			 }
 	    }
 	    //Reset tout les bool quand la ligne est retrouvée
-/*	    if(get_line_not_found()==LINE_FOUND)
+	    if(get_colors()==BLACK)
+	    {
+	    	if(left)
+	    	{
+	    		rotation(LEFT);
+	    	}
+	    	else
+	    	{
+	    		rotation(RIGHT);
+	    	}
+	    }
+	    if(get_line_not_found()==LINE_FOUND)
 	    {
 	    	obstacle=false;
 	    	obstacle_on_side=false;
 	    	corner=false;
-	    }*/
+	    }
     }
+}
+bool return_obstacle(void)
+{
+	return obstacle;
 }
 
 void skirt_start(void)
