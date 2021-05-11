@@ -18,6 +18,7 @@
 #include <follow_line.h>
 #include <colors.h>
 #include <run_over.h>
+#include <move.h>
 
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
@@ -70,6 +71,7 @@ int main(void)
 	line_follow_start();
 //	skirt_start();
 //	color_detection_start();
+	//move_start();
 
     /* Infinite loop. */
     while (1) {

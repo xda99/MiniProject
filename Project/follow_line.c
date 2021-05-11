@@ -22,6 +22,8 @@ static bool begin_turn=false;
 static bool green=true;
 static bool position_done=false;
 static uint16_t speed_virage_cor = 0;
+static int16_t speed_r=0;
+static int16_t speed_l=0;
 
 
 
@@ -29,8 +31,8 @@ static uint16_t speed_virage_cor = 0;
 void position(float distance, int16_t speed)
 {
 	left_motor_set_pos(0);
-	left_motor_set_speed(speed);
-	right_motor_set_speed(speed);
+	speed_l=speed;
+	speed_r=speed;
 	if(left_motor_get_pos()*0.13f>distance)
 	{
 		position_done=true;
@@ -63,8 +65,8 @@ void curve(void)
 	}
 	if(!begin_turn)
 	{
-		right_motor_set_speed(SPEED_EPUCK);
-		left_motor_set_speed(SPEED_EPUCK);
+		speed_r=SPEED_EPUCK;
+		speed_l=SPEED_EPUCK;
 	}
 
 	if(right_motor_get_pos()==40)
@@ -75,13 +77,13 @@ void curve(void)
 
 	if(right && turn && begin_turn)
 	{
-		right_motor_set_speed(SPEED_EPUCK-2*speed_virage_cor-80);
-		left_motor_set_speed(SPEED_EPUCK+2*speed_virage_cor+80);
+		speed_r=SPEED_EPUCK-2*speed_virage_cor-80;
+		speed_l=SPEED_EPUCK+2*speed_virage_cor+80;
 	}
 	else if(turn && begin_turn && !right)
 	{
-		right_motor_set_speed(SPEED_EPUCK+2*speed_virage_cor+80);
-		left_motor_set_speed(SPEED_EPUCK-2*speed_virage_cor-80);
+		speed_r=SPEED_EPUCK+2*speed_virage_cor+80;
+		speed_l=SPEED_EPUCK-2*speed_virage_cor-80;
 	}
 
 	if(get_line_not_found() == LINE_FOUND) //Ligne retrouvée
@@ -98,16 +100,25 @@ void straight_line(int16_t speed_correction)
 	if((get_line_not_found() != LINE_FOUND) && !position_done)
 	{
 		position(30, SPEED_EPUCK);
-		right_motor_set_speed(SPEED_EPUCK);
-		left_motor_set_speed(SPEED_EPUCK);
 	}
 	if(get_line_not_found() == LINE_FOUND)
 	{
-		right_motor_set_speed(SPEED_EPUCK - ROTATION_COEFF * speed_correction);
-		left_motor_set_speed(SPEED_EPUCK + ROTATION_COEFF * speed_correction);
+		speed_r=SPEED_EPUCK - ROTATION_COEFF * speed_correction;
+		speed_l=SPEED_EPUCK + ROTATION_COEFF * speed_correction;
 	}
 }
 
+
+
+int16_t return_speed_l_fl(void)
+{
+	return speed_l;
+}
+
+int16_t return_speed_r_fl(void)
+{
+	return speed_r;
+}
 
 static THD_WORKING_AREA(waLineFollow, 2048);
 static THD_FUNCTION(LineFollow, arg) {
@@ -135,8 +146,8 @@ static THD_FUNCTION(LineFollow, arg) {
 			if(((abs(speed_correction) < ROTATION_THRESHOLD) && !turn)/* && color!= RED*/)
 			{
 				speed_correction = 0;
-				right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
-				left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
+				speed_r=speed - ROTATION_COEFF * speed_correction;
+				speed_l=speed + ROTATION_COEFF * speed_correction;
 			}
 			else if((get_line_width() > THRESHOLD_CURVE || turn)/* && color!= RED*/) //=>virage
 			{
