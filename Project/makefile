@@ -14,7 +14,7 @@ CSRC += ./main.c \
 		./follow_line.c \
 		./colors.c \
 		./run_over.c \
-		
+		./move.c \
 
 #Header folders to include
 INCDIR += 

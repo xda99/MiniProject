@@ -37,4 +37,7 @@ int16_t regulator(void);
 * @return	The bool obstacle
 */
 bool return_obstacle(void);
+
+int16_t return_speed_l_ro(void);
+int16_t return_speed_r_ro(void);
 #endif /* RUN_OVER_H */

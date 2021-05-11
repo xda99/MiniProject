@@ -29,8 +29,8 @@ static bool rotation_done=false;
 static bool position_done=false;
 static bool corner=false;
 static uint8_t compt=0;
-
-static BSEMAPHORE_DECL(obstacle_sem, TRUE);
+static int16_t speed_r=0;
+static int16_t speed_l=0;
 
 void go_along(void)
 {
@@ -81,8 +81,8 @@ int16_t regulator(void)
 
 void rotation(int16_t direction)
 {
-    right_motor_set_speed(-direction);
-    left_motor_set_speed(direction);
+    speed_r=-direction;
+    speed_l=direction;
 }
 
 bool turn_left(void)
@@ -127,15 +127,10 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-//		time = chVTGetSystemTime();
-    	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_calibrated_prox(7));
- /*   	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
+    	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
     	 {
     		 obstacle=true;
-   	 	 }*/
-
-    	//waits until an image has been captured
-        chBSemWait(&obstacle_sem);
+   	 	 }
 
     	 if(obstacle)
     	 {
@@ -153,16 +148,15 @@ static THD_FUNCTION(Skirt, arg) {
 			 //computes a correction factor to let the robot rotate to be in front of the line
 			 if(left)
 			 {
-					 right_motor_set_speed(SPEED_EPUCK+speed_correction);
-					 left_motor_set_speed(SPEED_EPUCK-speed_correction);
+					 speed_r=SPEED_EPUCK+speed_correction;
+					 speed_l=SPEED_EPUCK-speed_correction;
 			 }
 			 else
 			 {
-					 right_motor_set_speed(SPEED_EPUCK-speed_correction);
-					 left_motor_set_speed(SPEED_EPUCK+speed_correction);
+					 speed_r=SPEED_EPUCK-speed_correction;
+					 speed_l=SPEED_EPUCK+speed_correction;
 			 }
 	    }
-	    //Reset tout les bool quand la ligne est retrouvée
 	    if(get_colors()==BLACK)
 	    {
 	    	if(left)
@@ -187,13 +181,21 @@ static THD_FUNCTION(Skirt, arg) {
 
     }
 }
-
+int16_t return_speed_r_ro(void)
+{
+	return speed_r;
+}
+int16_t return_speed_l_ro(void)
+{
+	return speed_l;
+}
 bool return_obstacle(void)
 {
-	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
+/*	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
 	 {
 		 obstacle=true;
-	 }
+		 chBSemSignal(&obstacle_sem);
+	 }*/
 	return obstacle;
 }
 
