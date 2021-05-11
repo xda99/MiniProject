@@ -25,7 +25,7 @@ static uint16_t speed_virage_cor = 0;
 
 
 
-//position_r and position_l in mm
+//position_r and position_l in mm, speed in step/s
 void position(float distance, int16_t speed)
 {
 	left_motor_set_pos(0);
@@ -37,14 +37,14 @@ void position(float distance, int16_t speed)
 	}
 }
 
-void virage(void)
+void curve(void)
 {
-	if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn)//Détecte un virage à droite
+	if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn)//Curve is on the right
 	{
 		right=true;
 		//chprintf((BaseSequentialStream *)&SD3,"Right\n");
 	}
-	else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn) //Détecte un virage à gauche
+	else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn) //Curve is on the left
 	{
 		right=false;
 		//chprintf((BaseSequentialStream *)&SD3,"Left\n");
@@ -108,21 +108,6 @@ void straight_line(int16_t speed_correction)
 	}
 }
 
-void color_detection(uint8_t color)
-{
-	if(color==RED)
-	{
-		//chprintf((BaseSequentialStream *)&SD3,"red\n");
-		right_motor_set_speed(0);
-		left_motor_set_speed(0);
-	}
-	if(color==GREEN)
-	{
-		//chprintf((BaseSequentialStream *)&SD3,"green\n");
-		right_motor_set_speed(SPEED_EPUCK);
-		left_motor_set_speed(SPEED_EPUCK);
-	}
-}
 
 static THD_WORKING_AREA(waLineFollow, 2048);
 static THD_FUNCTION(LineFollow, arg) {
@@ -155,13 +140,12 @@ static THD_FUNCTION(LineFollow, arg) {
 			}
 			else if((get_line_width() > THRESHOLD_CURVE || turn)/* && color!= RED*/) //=>virage
 			{
-				virage();
+				curve();
 			}
 			else if(!turn/* && color!= RED*/)
 			{
 				straight_line(speed_correction);
 			}
-			//color_detection(color);
 /*		}
 		else
 		{
