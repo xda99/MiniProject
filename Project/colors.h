@@ -17,10 +17,6 @@
 //Return true if so
 //bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE]);
 
-//Detect which color is present in front of the epuck2
-//Return a define representing the color detected
-uint8_t get_colors(void);
-void color_detection_start(void);
 
 #define 	RED			1
 #define		GREEN		2
@@ -28,5 +24,20 @@ void color_detection_start(void);
 #define		BLACK		4
 #define		YELLOW		5
 #define		NO_COLOR	6
+
+/**
+* @brief   Detects which color is present in front of the epuck
+*
+* @return					The color detected using a define
+*/
+
+uint8_t get_colors(void);
+
+/**
+* @brief   Begins the thread LineFollow
+*/
+
+void color_detection_start(void);
+
 
 #endif /* COLORS_H */

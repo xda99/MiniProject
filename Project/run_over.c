@@ -193,7 +193,6 @@ bool return_obstacle(void)
 	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
 	 {
 		 obstacle=true;
-		 chBSemSignal(&obstacle_sem);
 	 }
 	return obstacle;
 }

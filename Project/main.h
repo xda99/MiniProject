@@ -24,7 +24,7 @@ extern "C" {
 #define KI 								3.5f//must not be zero
 #define KD								1
 #define MAX_SUM_ERROR 					(MOTOR_SPEED_LIMIT/KI)
-#define SPEED_EPUCK						250
+#define SPEED_EPUCK						250 //constant speed of the epuck in step/s
 #define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
 #define IR_VALUE						60
 #define WHEEL_DISTANCE					53 //mm
