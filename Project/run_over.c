@@ -28,7 +28,9 @@ static bool left=false;
 static bool rotation_done=false;
 static bool position_done=false;
 static bool corner=false;
-static	uint8_t compt=0;
+static uint8_t compt=0;
+
+static BSEMAPHORE_DECL(obstacle_sem, TRUE);
 
 void go_along(void)
 {
@@ -57,7 +59,6 @@ int16_t regulator(void)
 	//	INT8?
 	int16_t error = 0;
 	int16_t speed = 0;
-	static int16_t errord=0;
 
 	if(left)
 	{
@@ -103,11 +104,13 @@ bool turn_left(void)
 	}
 }
 
-static THD_WORKING_AREA(waSkirt, 1024);
+static THD_WORKING_AREA(waSkirt, 2048);
 static THD_FUNCTION(Skirt, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
+
+    systime_t time;
 
    //Thread for the claxon!
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
@@ -124,11 +127,16 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
+//		time = chVTGetSystemTime();
     	// chprintf((BaseSequentialStream *)&SD3,"%d\n", get_calibrated_prox(7));
-    	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
+ /*   	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
     	 {
     		 obstacle=true;
-    	 }
+   	 	 }*/
+
+    	//waits until an image has been captured
+        chBSemWait(&obstacle_sem);
+
     	 if(obstacle)
     	 {
     		 go_along();
@@ -145,45 +153,13 @@ static THD_FUNCTION(Skirt, arg) {
 			 //computes a correction factor to let the robot rotate to be in front of the line
 			 if(left)
 			 {
-/*				 if(get_calibrated_prox(2)<CORNER &&) !corner)
-				{
-					chprintf((BaseSequentialStream *)&SD3,"left\n");
-					corner=true;
-					 right_motor_set_pos(0);
-				}
-			  //chprintf((BaseSequentialStream *)&SD3,"1\n");
-				 if(!corner)
-				 {
-				 														*/
 					 right_motor_set_speed(SPEED_EPUCK+speed_correction);
 					 left_motor_set_speed(SPEED_EPUCK-speed_correction);
 			 }
-/*				 else
-				 {
-					 corner_rotation();
-				 }
-			 }*/
 			 else
 			 {
-/*				 if(get_calibrated_prox(5)<CORNER && !corner)
-				 {
-					 chprintf((BaseSequentialStream *)&SD3,"right\n");
-					 corner=true;
-					 right_motor_set_pos(0);
-				 }
-
-				 if(!corner)
-				 {*/
-
 					 right_motor_set_speed(SPEED_EPUCK-speed_correction);
 					 left_motor_set_speed(SPEED_EPUCK+speed_correction);
-
-/*				 }
-
-				 else
-				 {
-					 corner_rotation();
-				 }*/
 			 }
 	    }
 	    //Reset tout les bool quand la ligne est retrouvée
@@ -203,11 +179,22 @@ static THD_FUNCTION(Skirt, arg) {
 	    	obstacle=false;
 	    	obstacle_on_side=false;
 	    	corner=false;
+//	    	chThdYield();
 	    }
+		//100Hz
+//		chThdSleepUntilWindowed(time, time + MS2ST(10));
+		chThdSleepMilliseconds(10);
+
     }
 }
+
 bool return_obstacle(void)
 {
+	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
+	 {
+		 obstacle=true;
+		 chBSemSignal(&obstacle_sem);
+	 }
 	return obstacle;
 }
 

@@ -2,7 +2,7 @@
 #define RUN_OVER_H
 
 void skirt_start(void);
-void run_over(void);
+void go_along(void);
 void rotation(int16_t direction);
 bool turn_left(void);
 int16_t regulator(void);

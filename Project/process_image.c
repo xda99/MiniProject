@@ -129,7 +129,6 @@ static THD_FUNCTION(CaptureImage, arg) {
     }
 }
 
-
 static THD_WORKING_AREA(waProcessImage, 2048);
 static THD_FUNCTION(ProcessImage, arg) {
 

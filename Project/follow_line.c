@@ -7,7 +7,7 @@
 
 #include <main.h>
 #include <motors.h>
-#include <pi_regulator.h>
+#include <run_over.h>
 #include <process_image.h>
 #include <colors.h>
 
@@ -60,7 +60,6 @@ void virage(void)
 	if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn) //Peut commencer à tourner
 	{
 		begin_turn=true;
-		chprintf((BaseSequentialStream *)&SD3,"Begin turn\n");
 	}
 	if(!begin_turn)
 	{
@@ -136,32 +135,43 @@ static THD_FUNCTION(LineFollow, arg) {
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
 
-    while(1){
-        time = chVTGetSystemTime();
+    while(1)
+    {
+		time = chVTGetSystemTime();
 
-        	uint8_t color = get_colors();
+		uint8_t color = get_colors();
 
+//		if(!return_obstacle())
+//		{
 			//computes a correction factor to let the robot rotate to be in front of the line
 			speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
 			//if the line is nearly in front of the camera, don't rotate
-			if(((abs(speed_correction) < ROTATION_THRESHOLD) && !turn) && color!= RED)
+			if(((abs(speed_correction) < ROTATION_THRESHOLD) && !turn)/* && color!= RED*/)
 			{
 				speed_correction = 0;
 				right_motor_set_speed(speed - ROTATION_COEFF * speed_correction);
 				left_motor_set_speed(speed + ROTATION_COEFF * speed_correction);
 			}
-			else if((get_line_width() > THRESHOLD_CURVE || turn) && color!= RED) //=>virage
+			else if((get_line_width() > THRESHOLD_CURVE || turn)/* && color!= RED*/) //=>virage
 			{
 				virage();
 			}
-			else if(!turn && color!= RED)
+			else if(!turn/* && color!= RED*/)
 			{
 				straight_line(speed_correction);
 			}
-			color_detection(color);
-			//100Hz
-			chThdSleepUntilWindowed(time, time + MS2ST(10));
+			//color_detection(color);
+/*		}
+		else
+		{
+	    	chThdYield();
+		}*/
+
+		//100Hz
+//		chThdSleepUntilWindowed(time, time + MS2ST(10));
+		chThdSleepMilliseconds(10);
+
     }
 }
 
