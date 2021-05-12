@@ -25,15 +25,10 @@
 static bool obstacle=false;
 static bool obstacle_on_side=false;
 static bool left=false;
-static bool rotation_done=false;
-static bool position_done=false;
 static bool corner=false;
-static uint8_t compt=0;
 static int16_t speed_r=0;
 static int16_t speed_l=0;
-static bool run_over=false;
 
-//static BSEMAPHORE_DECL(run_over_sem, TRUE);
 
 void go_along(void)
 {
@@ -107,14 +102,10 @@ static THD_FUNCTION(Skirt, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-    systime_t time;
-
    //Thread for the claxon!
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
    // setSoundFileVolume(VOLUME_MAX);
     playMelodyStart();					//Pour faire une mélodie depuis le code
-   // regulator_start();
-
 
     // - IR0 (front-right) + IR4 (back-left)
     // - IR1 (front-right-45deg) + IR5 (left)
@@ -124,16 +115,10 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-		time = chVTGetSystemTime();
-
-//        chBSemWait(&run_over_sem);
-
     	 if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side) //=> obstacle
     	 {
     		 obstacle=true;
-    		 run_over=true;
     		 go_along();
-  //  		 chprintf((BaseSequentialStream *)&SD3,"Obstacle=%d\n",return_obstacle());
    	 	 }
 
     	if((get_calibrated_prox(2)>(IR_VALUE-10) || get_calibrated_prox(5)>(IR_VALUE-10)) && !obstacle_on_side)
@@ -156,32 +141,15 @@ static THD_FUNCTION(Skirt, arg) {
 					 speed_l=SPEED_EPUCK+speed_correction;
 			 }
 	    }
-/*	    if(get_colors()==BLACK)
-	    {
-	    	if(left)
-	    	{
-	    		rotation(LEFT);
-	    	}
-	    	else
-	    	{
-	    		rotation(RIGHT);
-	    	}
-	    }*/
+
 	    if(get_line_not_found()==LINE_FOUND)
 	    {
 	    	obstacle=false;
 	    	obstacle_on_side=false;
 	    	corner=false;
-	    	run_over=false;
 	    }
-		//100Hz
-//		chThdSleepUntilWindowed(time, time + MS2ST(10));
- //   	chprintf((BaseSequentialStream *)&SD3,"time=%d\n",chVTGetSystemTime()-time);
- //   	chprintf((BaseSequentialStream *)&SD3,"Obstacle2\n");
+//Commenter
 	    chThdYield();
-//	    chprintf((BaseSequentialStream *)&SD3,"Obstacle=%d\n",return_obstacle());
-//		chThdSleepMilliseconds(10);
-
     }
 }
 int16_t return_speed_r_ro(void)
@@ -202,7 +170,3 @@ void skirt_start(void)
 	chThdCreateStatic(waSkirt, sizeof(waSkirt), NORMALPRIO, Skirt, NULL);
 }
 
-bool return_run_over(void)
-{
-	return run_over;
-}

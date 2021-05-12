@@ -18,12 +18,10 @@
 #include <follow_line.h>
 #include <colors.h>
 #include <run_over.h>
-#include <move.h>
 
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
-
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
 {
@@ -63,7 +61,6 @@ int main(void)
 	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	//Thread for the IR distance sensor
 	proximity_start();
-//	chThdSleepMilliseconds(1000);
 	calibrate_ir();
 
 	//stars the threads for the pi regulator and the processing of the image
@@ -71,15 +68,12 @@ int main(void)
 	line_follow_start();
 	skirt_start();
 	color_detection_start();
-//	move_start();
 
     /* Infinite loop. */
     while (1)
     {
-    	chprintf((BaseSequentialStream *)&SD3,"M\n");
-        if(return_run_over())
+        if(return_obstacle())
         {
- //       	chBSemSignal(&run_over_sem);
         	right_motor_set_speed(return_speed_r_ro());
         	left_motor_set_speed(return_speed_l_ro());
         }
@@ -90,13 +84,10 @@ int main(void)
         }
         else
         {
-//        	chBSemSignal(&follow_line_sem);
         	right_motor_set_speed(return_speed_r_fl());
         	left_motor_set_speed(return_speed_l_fl());
         }
     	//waits 1 second
-//       chThdSleepMilliseconds(10);
-//    	chprintf((BaseSequentialStream *)&SD3,"Main2\n");
     	chThdYield();
     }
 }
