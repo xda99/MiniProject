@@ -4,18 +4,17 @@
 #include <usbcfg.h>
 #include <chprintf.h>
 
-
 #include <main.h>
 #include <motors.h>
 #include <process_image.h>
 #include <colors.h>
-#include <follow_line.h>
 #include <move.h>
 #include <follow_line.h>
 #include <run_over.h>
 
 void move(void)
 {
+	chprintf((BaseSequentialStream *)&SD3,"red\n");
 	if(return_obstacle())
 	{
 		right_motor_set_speed(return_speed_r_ro());

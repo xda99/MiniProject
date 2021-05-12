@@ -1,9 +1,9 @@
-#ifndef MOTORS_H
-#define MOTORS_H
+#ifndef MOVE_H
+#define MOVE_H
 
 /**
 * @brief	Set the speed of the motors in function of the black line, the obstacles and the colors detected
 */
-void move(void)
+void move(void);
 
-#endif /* MOTORS_H */
+#endif /* MOVE_H */

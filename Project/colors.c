@@ -105,6 +105,7 @@ static THD_FUNCTION(ColorDetection, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
+
     while(1)
     {
     	uint8_t color = get_colors();
@@ -137,8 +138,8 @@ static THD_FUNCTION(ColorDetection, arg) {
 				left_motor_set_speed(SPEED_EPUCK-100);
 			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
 		}*/
-
-    	 chThdYield();
+    	chThdSleepMilliseconds(10);
+ //   	 chThdYield();
     }
 }
 

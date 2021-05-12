@@ -1,34 +1,27 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-
-#include "ch.h"
 #include "hal.h"
 #include "memory_protection.h"
 #include <usbcfg.h>
 #include <main.h>
-#include <motors.h>
+#include <motors.h>//////////////////////////////////////////////
 #include <camera/po8030.h>
-#include <chprintf.h>
+#include <chprintf.h> ///////////////////////////A enlever////////////////////////////
 #include <sensors/proximity.h>
 
-#include <pi_regulator.h>
 #include <process_image.h>
 #include <follow_line.h>
 #include <colors.h>
 #include <run_over.h>
+#include <move.h>
 
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
 
 void SendUint8ToComputer(uint8_t* data, uint16_t size) 
-{
-	/*chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
+{/*
+	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)&size, sizeof(uint16_t));
 	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);*/
-
 }
 
 static void serial_start(void)
@@ -49,9 +42,9 @@ int main(void)
     chSysInit();
     mpu_init();
 
-    //starts the serial communication
+    //starts the serial communication////////////A enlever?//////////
     serial_start();
-    //start the USB communication
+    //start the USB communication////////////A enlever?//////////
     usb_start();
     //starts the camera
     dcmi_start();
@@ -72,21 +65,7 @@ int main(void)
     /* Infinite loop. */
     while (1)
     {
-        if(return_obstacle())
-        {
-        	right_motor_set_speed(return_speed_r_ro());
-        	left_motor_set_speed(return_speed_l_ro());
-        }
-        else if(return_color_detected())
-        {
-        	right_motor_set_speed(return_speed_r_c());
-        	left_motor_set_speed(return_speed_l_c());
-        }
-        else
-        {
-        	right_motor_set_speed(return_speed_r_fl());
-        	left_motor_set_speed(return_speed_l_fl());
-        }
+    	move();
     	//waits 1 second
     	chThdYield();
     }
