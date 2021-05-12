@@ -1,19 +1,19 @@
 #include <sensors/proximity.h>
-#include <ch.h>
-#include <hal.h>
+//#include <ch.h>
+//#include <hal.h>
 #include "audio/microphone.h"
 #include "audio/mp45dt02_processing.h"
-#include <fat.h>
+//#include <fat.h>
 #include <audio/audio_thread.h>
 
-#include <chprintf.h>
+//#include <chprintf.h>
 #include <motors.h>
-#include <colors.h>
+//#include <colors.h>
 #include <main.h>
 #include <audio/play_melody.h>
 #include <run_over.h>
 #include <follow_line.h>
-#include <process_image.h>
+//#include <process_image.h>
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
