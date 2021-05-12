@@ -33,13 +33,23 @@ bool turn_left(void);
 int16_t regulator(void);
 
 /**
+* @brief   	Return a speed for the left motor in function of the color seen
+*
+* @return	The static int16_t speed_l
+*/
+int16_t return_speed_l_ro(void);
+
+/**
+* @brief   	Return a speed for the right motor in function of the color seen
+*
+* @return	The static int16_t speed_r
+*/
+int16_t return_speed_r_ro(void);
+
+/**
 * @brief	Return the status of the bool obstacle to know in other threads that there is an obstacle
-* @return	The bool obstacle
+* @return	The static bool obstacle
 */
 bool return_obstacle(void);
 
-int16_t return_speed_l_ro(void);
-int16_t return_speed_r_ro(void);
-
-bool return_run_over(void);
 #endif /* RUN_OVER_H */
