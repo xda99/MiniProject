@@ -25,22 +25,6 @@ static int16_t	speed_r=0;
 static int16_t	speed_l=0;
 static bool color_detected=false;
 
-/*
-void color(void)
-{
-	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
-
-	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-	{
-		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0) + ((uint8_t)img_buff_ptr[i]&07);
-		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
-	}
-}
-*/
-
 uint8_t get_colors(void)
 {
 	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
@@ -87,8 +71,6 @@ uint8_t get_colors(void)
 			}
 		}
 
-//	SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
-
 	if(compt_red>LINE_SIZE)
 	{
 		color_detected=true;
@@ -123,22 +105,17 @@ static THD_FUNCTION(ColorDetection, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-	systime_t time;
-
     while(1)
     {
-    	time = chVTGetSystemTime();
     	uint8_t color = get_colors();
 
     	if(color==RED)
     	{
-    		//chprintf((BaseSequentialStream *)&SD3,"red\n");
 			speed_r=0;
 			speed_l=0;
     	}
     	if(color==GREEN)
 		{
-			//chprintf((BaseSequentialStream *)&SD3,"green\n");
 			speed_r=SPEED_EPUCK;
 			speed_l=SPEED_EPUCK;
 		}
@@ -152,7 +129,6 @@ static THD_FUNCTION(ColorDetection, arg) {
     	}
      	if(color==YELLOW) // Passage pieton => Ralenti
 		{
-			chprintf((BaseSequentialStream *)&SD3,"yellow\n");
     		position=right_motor_get_pos();
 			right_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
 			left_motor_set_pos(CAMERA__DISTANCE_CORRECTION);
@@ -162,8 +138,7 @@ static THD_FUNCTION(ColorDetection, arg) {
 			}while(abs(position-right_motor_get_pos())<CAMERA__DISTANCE_CORRECTION);
 		}*/
 
-    	 //100Hz
-    	 chThdSleepUntilWindowed(time, time + MS2ST(10));
+    	 chThdYield();
     }
 }
 
@@ -185,121 +160,3 @@ bool return_color_detected(void)
 {
 	return color_detected;
 }
-
-
-
-/*
-bool red(void)
-{
-	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t *img_buff_ptr;
-	uint16_t compt=0;
-	uint16_t compt_black=0;
-
-	img_buff_ptr = dcmi_get_last_image_ptr();
-	//Extract only the red pixels
-	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-	{
-		red[i/2] = (uint8_t)img_buff_ptr[i]&0xF8;
-		if(red[i/2]>110)
-		{
-			compt+=1;
-		}
-		if(red[i/2]<10)
-		{
-			compt_black+=1;
-		}
-	}
-
-	//SendUint8ToComputer(red, IMAGE_BUFFER_SIZE);
-	if(compt>LINE_SIZE)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-	//return color_detection(red);
-}
-
-bool green(void)
-{
-	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t *img_buff_ptr;
-
-	uint16_t compt=0;
-
-	img_buff_ptr = dcmi_get_last_image_ptr();
-
-	//Extract only the green pixels
-	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-	{
-		green[i/2] = ((uint8_t)img_buff_ptr[i+1]&0xE0>>5) + ((uint8_t)img_buff_ptr[i]&0x07<<3);
-
-		if(green[i/2]>22)
-		{
-			compt+=1;
-		}
-	}
-
-	SendUint8ToComputer(green, IMAGE_BUFFER_SIZE);
-
-	if(compt>LINE_SIZE)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-
-}
-
-bool blue(void)
-{
-	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t *img_buff_ptr;
-	uint16_t compt=0;
-
-	img_buff_ptr = dcmi_get_last_image_ptr();
-
-	for(uint16_t i = 0 ; i < (2 * IMAGE_BUFFER_SIZE) ; i+=2)
-	{
-		blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
-
-		if(blue[i/2]>12)
-		{
-			compt+=1;
-		}
-	}
-	//SendUint8ToComputer(blue, IMAGE_BUFFER_SIZE);
-
-	if(compt>LINE_SIZE)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-bool color_detection(uint8_t color[IMAGE_BUFFER_SIZE])
-{
-	uint16_t compt=0;
-	for(uint16_t i=0; i<IMAGE_BUFFER_SIZE; i+=1)
-	{
-		if(color[i]>120)
-		{
-			compt+=1;
-		}
-	}
-	if(compt>LINE_SIZE)
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}*/
