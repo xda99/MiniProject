@@ -20,6 +20,7 @@ static uint8_t line_not_found = 0;
 //semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
 
+
 /*
  *  Returns the line's width extracted from the image buffer given
  *  Returns 0 if line not found
@@ -186,6 +187,7 @@ uint16_t get_line_width(void){
 uint8_t get_line_not_found(void){
 	return line_not_found;
 }
+
 
 void process_image_start(void){
 	chThdCreateStatic(waProcessImage, sizeof(waProcessImage), NORMALPRIO, ProcessImage, NULL);

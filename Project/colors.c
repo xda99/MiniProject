@@ -21,6 +21,9 @@
 #define 	THRESHOLD_YELLOW_R		80
 #define 	THRESHOLD_YELLOW_G	 	17
 
+static int16_t	speed_r=0;
+static int16_t	speed_l=0;
+static bool color_detected=false;
 
 /*
 void color(void)
@@ -88,13 +91,15 @@ uint8_t get_colors(void)
 
 	if(compt_red>LINE_SIZE)
 	{
+		color_detected=true;
 		return RED;
 	}
 	else if(compt_green>LINE_SIZE)
 	{
+		color_detected=true;
 		return GREEN;
 	}
-	else if(compt_blue>LINE_SIZE)
+/*	else if(compt_blue>LINE_SIZE)
 	{
 		return BLUE;
 	}
@@ -105,9 +110,9 @@ uint8_t get_colors(void)
 	else if(compt_yellow>LINE_SIZE)
 	{
 		return YELLOW;
-	}
+	}*/
 	else
-	{
+	{	color_detected=false;
 		return NO_COLOR;
 	}
 }
@@ -128,14 +133,14 @@ static THD_FUNCTION(ColorDetection, arg) {
     	if(color==RED)
     	{
     		//chprintf((BaseSequentialStream *)&SD3,"red\n");
-    		right_motor_set_speed(0);
-    		left_motor_set_speed(0);
+			speed_r=0;
+			speed_l=0;
     	}
     	if(color==GREEN)
 		{
 			//chprintf((BaseSequentialStream *)&SD3,"green\n");
-			right_motor_set_speed(SPEED_EPUCK);
-			left_motor_set_speed(SPEED_EPUCK);
+			speed_r=SPEED_EPUCK;
+			speed_l=SPEED_EPUCK;
 		}
 /*    	if(color==BLUE)
     	{
@@ -162,10 +167,25 @@ static THD_FUNCTION(ColorDetection, arg) {
     }
 }
 
+int16_t return_speed_r_c(void)
+{
+	return speed_r;
+}
+int16_t return_speed_l_c(void)
+{
+	return speed_l;
+}
+
 void color_detection_start(void)
 {
 	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO+1, ColorDetection, NULL);
 }
+
+bool return_color_detected(void)
+{
+	return color_detected;
+}
+
 
 
 /*

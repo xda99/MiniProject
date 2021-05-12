@@ -31,6 +31,9 @@ static bool corner=false;
 static uint8_t compt=0;
 static int16_t speed_r=0;
 static int16_t speed_l=0;
+static bool run_over=false;
+
+//static BSEMAPHORE_DECL(run_over_sem, TRUE);
 
 void go_along(void)
 {
@@ -46,12 +49,6 @@ void go_along(void)
 	{
 		rotation(RIGHT);
 	}
-
-	if((get_calibrated_prox(2)>IR_VALUE || get_calibrated_prox(5)>IR_VALUE) && !obstacle_on_side)
-	{
-		obstacle_on_side=true;
-	}
-	 obstacle=false;
 }
 
 int16_t regulator(void)
@@ -127,20 +124,22 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-    	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
+		time = chVTGetSystemTime();
+
+//        chBSemWait(&run_over_sem);
+
+    	 if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side) //=> obstacle
     	 {
     		 obstacle=true;
+    		 run_over=true;
+    		 go_along();
+  //  		 chprintf((BaseSequentialStream *)&SD3,"Obstacle=%d\n",return_obstacle());
    	 	 }
 
-    	 if(obstacle)
-    	 {
-    		 go_along();
-    	 }
-
-		if((get_calibrated_prox(2)>IR_VALUE|| get_calibrated_prox(5)>IR_VALUE) && !obstacle_on_side)
-		{
-			obstacle_on_side=true;
-		}
+    	if((get_calibrated_prox(2)>(IR_VALUE-10) || get_calibrated_prox(5)>(IR_VALUE-10)) && !obstacle_on_side)
+    	{
+    		obstacle_on_side=true;
+    	}
 
 	    if(obstacle_on_side)
 	    {
@@ -157,7 +156,7 @@ static THD_FUNCTION(Skirt, arg) {
 					 speed_l=SPEED_EPUCK+speed_correction;
 			 }
 	    }
-	    if(get_colors()==BLACK)
+/*	    if(get_colors()==BLACK)
 	    {
 	    	if(left)
 	    	{
@@ -167,17 +166,21 @@ static THD_FUNCTION(Skirt, arg) {
 	    	{
 	    		rotation(RIGHT);
 	    	}
-	    }
+	    }*/
 	    if(get_line_not_found()==LINE_FOUND)
 	    {
 	    	obstacle=false;
 	    	obstacle_on_side=false;
 	    	corner=false;
-//	    	chThdYield();
+	    	run_over=false;
 	    }
 		//100Hz
 //		chThdSleepUntilWindowed(time, time + MS2ST(10));
-		chThdSleepMilliseconds(10);
+ //   	chprintf((BaseSequentialStream *)&SD3,"time=%d\n",chVTGetSystemTime()-time);
+ //   	chprintf((BaseSequentialStream *)&SD3,"Obstacle2\n");
+	    chThdYield();
+//	    chprintf((BaseSequentialStream *)&SD3,"Obstacle=%d\n",return_obstacle());
+//		chThdSleepMilliseconds(10);
 
     }
 }
@@ -191,15 +194,15 @@ int16_t return_speed_l_ro(void)
 }
 bool return_obstacle(void)
 {
-/*	 if(get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE)
-	 {
-		 obstacle=true;
-		 chBSemSignal(&obstacle_sem);
-	 }*/
 	return obstacle;
 }
 
 void skirt_start(void)
 {
 	chThdCreateStatic(waSkirt, sizeof(waSkirt), NORMALPRIO, Skirt, NULL);
+}
+
+bool return_run_over(void)
+{
+	return run_over;
 }

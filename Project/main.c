@@ -63,20 +63,41 @@ int main(void)
 	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	//Thread for the IR distance sensor
 	proximity_start();
-	chThdSleepMilliseconds(1000);
+//	chThdSleepMilliseconds(1000);
 	calibrate_ir();
 
 	//stars the threads for the pi regulator and the processing of the image
 	process_image_start();
 	line_follow_start();
-//	skirt_start();
-//	color_detection_start();
-	//move_start();
+	skirt_start();
+	color_detection_start();
+//	move_start();
 
     /* Infinite loop. */
-    while (1) {
+    while (1)
+    {
+    	chprintf((BaseSequentialStream *)&SD3,"M\n");
+        if(return_run_over())
+        {
+ //       	chBSemSignal(&run_over_sem);
+        	right_motor_set_speed(return_speed_r_ro());
+        	left_motor_set_speed(return_speed_l_ro());
+        }
+        else if(return_color_detected())
+        {
+        	right_motor_set_speed(return_speed_r_c());
+        	left_motor_set_speed(return_speed_l_c());
+        }
+        else
+        {
+//        	chBSemSignal(&follow_line_sem);
+        	right_motor_set_speed(return_speed_r_fl());
+        	left_motor_set_speed(return_speed_l_fl());
+        }
     	//waits 1 second
-        chThdSleepMilliseconds(1000);
+//       chThdSleepMilliseconds(10);
+//    	chprintf((BaseSequentialStream *)&SD3,"Main2\n");
+    	chThdYield();
     }
 }
 

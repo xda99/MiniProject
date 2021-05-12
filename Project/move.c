@@ -20,22 +20,27 @@ static THD_FUNCTION(Move, arg)
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-    if(return_obstacle())
+    while(1)
     {
-    	right_motor_set_speed(return_speed_r_ro());
-    	left_motor_set_speed(return_speed_l_ro());
+        if(return_obstacle())
+        {
+        	chprintf((BaseSequentialStream *)&SD3,"1\n");
+        	right_motor_set_speed(return_speed_r_ro());
+        	left_motor_set_speed(return_speed_l_ro());
+        }
+       /* else if(return_color())
+        {
+        	right_motor_set_speed();
+        	left_motor_set_speed();
+        }*/
+        else
+        {
+        	chprintf((BaseSequentialStream *)&SD3,"4\n");
+        	right_motor_set_speed(return_speed_r_fl());
+        	left_motor_set_speed(return_speed_l_fl());
+        }
+		chThdSleepMilliseconds(10);
     }
-   /* else if(return_color())
-    {
-    	right_motor_set_speed();
-    	left_motor_set_speed();
-    }*/
-    else
-    {
-    	right_motor_set_speed(return_speed_r_fl());
-    	left_motor_set_speed(return_speed_l_fl());
-    }
-
 }
 
 void move_start(void)

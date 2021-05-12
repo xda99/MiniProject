@@ -38,6 +38,9 @@ uint8_t get_colors(void);
 */
 
 void color_detection_start(void);
+int16_t return_speed_l_c(void);
+int16_t return_speed_r_c(void);
+bool return_color_detected(void);
 
 
 #endif /* COLORS_H */

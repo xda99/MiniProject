@@ -13,7 +13,7 @@ extern "C" {
 //constants for the differents parts of the project
 #define IMAGE_BUFFER_SIZE				640
 #define WIDTH_SLOPE						5
-#define MIN_LINE_WIDTH					40
+#define MIN_LINE_WIDTH					200
 #define ROTATION_THRESHOLD				10
 #define ROTATION_COEFF					2
 #define PXTOCM							1570.0f //experimental value
@@ -26,7 +26,7 @@ extern "C" {
 #define MAX_SUM_ERROR 					(MOTOR_SPEED_LIMIT/KI)
 #define SPEED_EPUCK						250 //constant speed of the epuck in step/s
 #define CAMERA__DISTANCE_CORRECTION		450 //correction as the camera is not under the e-puck
-#define IR_VALUE						60
+#define IR_VALUE						120
 #define WHEEL_DISTANCE					53 //mm
 #define LINE_FOUND						2
 /** Robot wide IPC bus. */
