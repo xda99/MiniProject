@@ -68,21 +68,20 @@ void curve(void)
 		begin_turn=true;
 	}
 
-	//The epuck continues to go in a straight line until the bool begin_turn is true
+	//The epuck continues to go in a straight line to avoid it to turn to early
 	if(!begin_turn)
 	{
 		speed_r=SPEED_EPUCK;
 		speed_l=SPEED_EPUCK;
 	}
 
-	//Take the distance between the center of the camera and the black line to know an
-	//approximation of the curvature of the turn
+	//To know an approximation of the curvature of the turn
 	if(right_motor_get_pos()==DISTANCE_CURVATURE)
 	{
 		speed_virage_corr=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));
 	}
 
-	//Correct the speed in function of the sens of the curvature
+	//Correct the speed in function of the sense of the curvature
 	if(right && turn && begin_turn)
 	{
 		speed_r=SPEED_EPUCK-2*speed_virage_corr-CURVE_CORRECTION;
@@ -123,7 +122,6 @@ static THD_FUNCTION(LineFollow, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-    int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
 
     while(1)

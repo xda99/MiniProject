@@ -1,7 +1,8 @@
 #ifndef FOLLOW_LINE_H
 #define FOLLOW_LINE_H
 
-#define THRESHOLD_CURVE 	290 //number of pixels/threshold that define the beginning of a curve
+//number of pixels/threshold that define the beginning of a curve
+#define THRESHOLD_CURVE 	290 //////////////////////////////////////////////////////////////////////
 
 /**
 * @brief  	The robot travels the given distance
