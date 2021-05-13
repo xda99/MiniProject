@@ -22,6 +22,7 @@
 static int16_t	speed_r=0;
 static int16_t	speed_l=0;
 static bool color_detected=false;
+static int16_t speed_reduction=SPEED_EPUCK;
 
 uint8_t get_colors(void)
 {
@@ -113,10 +114,14 @@ static THD_FUNCTION(ColorDetection, arg) {
 			speed_r=SPEED_EPUCK;
 			speed_l=SPEED_EPUCK;
 		}
-/*    	if(color==BLUE)
+    	if(color==BLUE)
     	{
-    		//chprintf((BaseSequentialStream *)&SD3,"blue\n");
+    		speed_reduction=SPEED_EPUCK/2;
     	}
+    	else
+    	{
+    		speed_reduction=SPEED_EPUCK;
+    	}/*
       	if(color==BLACK)
     	{
     		chprintf((BaseSequentialStream *)&SD3,"black\n");
@@ -153,4 +158,9 @@ void color_detection_start(void)
 bool return_color_detected(void)
 {
 	return color_detected;
+}
+
+int16_t return_speed_reduction(void)
+{
+	return speed_reduction;
 }

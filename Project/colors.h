@@ -41,4 +41,10 @@ int16_t return_speed_r_c(void);
 */
 bool return_color_detected(void);
 
+/**
+* @brief	Return the speed reduction factor to go slower when there is blue
+*
+* @return	The static int16_t speed_reduction
+*/
+int16_t return_speed_reduction(void);
 #endif /* COLORS_H */

@@ -19,7 +19,7 @@ void move(void)
 	}
 	else
 	{
-		right_motor_set_speed(return_speed_r_fl());
-		left_motor_set_speed(return_speed_l_fl());
+		right_motor_set_speed(return_speed_r_fl()-return_speed_reduction());
+		left_motor_set_speed(return_speed_l_fl()-return_speed_reduction());
 	}
 }
