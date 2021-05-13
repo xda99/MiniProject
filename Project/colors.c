@@ -13,13 +13,11 @@
 
 #include <colors.h>
 
-#define 	LINE_SIZE				40
-#define		THRESHOLD_RED			140
-#define		THRESHOLD_GREEN			27
+#define 	LINE_SIZE				175//40
+#define		THRESHOLD_RED			130//140
+#define		THRESHOLD_GREEN			24//22//27
 #define		THRESHOLD_BLUE			16
 #define 	THRESHOLD_BLACK			10
-#define 	THRESHOLD_YELLOW_R		80
-#define 	THRESHOLD_YELLOW_G	 	17
 
 static int16_t	speed_r=0;
 static int16_t	speed_l=0;
@@ -35,7 +33,6 @@ uint8_t get_colors(void)
 	uint16_t compt_green=0;
 	uint16_t compt_blue=0;
 	uint16_t compt_black=0;
-	uint16_t compt_yellow=0;
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
@@ -54,7 +51,7 @@ uint8_t get_colors(void)
 
 			green[i/2] = (((uint8_t)img_buff_ptr[i+1]&0xE0)>>5) + (((uint8_t)img_buff_ptr[i]&0x07)<<3);
 
-			if(green[i/2]>THRESHOLD_GREEN)
+			if(green[i/2]>THRESHOLD_GREEN && red[i/2]<65)
 			{
 				compt_green+=1;
 			}
@@ -65,10 +62,6 @@ uint8_t get_colors(void)
 			{
 				compt_blue+=1;
 			}
-			if(red[i/2]>THRESHOLD_YELLOW_R && green[i/2]>THRESHOLD_YELLOW_G)
-			{
-				compt_yellow+=1;
-			}
 		}
 
 	if(compt_red>LINE_SIZE)
@@ -78,7 +71,7 @@ uint8_t get_colors(void)
 	}
 	else if(compt_green>LINE_SIZE)
 	{
-		color_detected=true;
+		color_detected=false;
 		return GREEN;
 	}
 /*	else if(compt_blue>LINE_SIZE)
@@ -94,7 +87,7 @@ uint8_t get_colors(void)
 		return YELLOW;
 	}*/
 	else
-	{	color_detected=false;
+	{
 		return NO_COLOR;
 	}
 }
