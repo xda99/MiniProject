@@ -17,15 +17,11 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
-#define 	CORNER					10
-#define		ANGLE					1.57
 #define		STEP_TO_MM				0.13f
-#define		DISTANCE				40
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;
 static bool left=false;
-static bool corner=false;
 static int16_t speed_r=0;
 static int16_t speed_l=0;
 
@@ -115,7 +111,7 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-    	 if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side) //=> obstacle
+    	 if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side)
     	 {
     		 obstacle=true;
     		 go_along();
@@ -129,7 +125,6 @@ static THD_FUNCTION(Skirt, arg) {
 	    if(obstacle_on_side)
 	    {
 			 speed_correction=regulator();
-			 //computes a correction factor to let the robot rotate to be in front of the line
 			 if(left)
 			 {
 					 speed_r=SPEED_EPUCK+speed_correction;
@@ -146,9 +141,7 @@ static THD_FUNCTION(Skirt, arg) {
 	    {
 	    	obstacle=false;
 	    	obstacle_on_side=false;
-	    	corner=false;
 	    }
-//Commenter
 	    chThdYield();
     }
 }
@@ -156,10 +149,12 @@ int16_t return_speed_r_ro(void)
 {
 	return speed_r;
 }
+
 int16_t return_speed_l_ro(void)
 {
 	return speed_l;
 }
+
 bool return_obstacle(void)
 {
 	return obstacle;
