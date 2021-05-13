@@ -123,7 +123,6 @@ static THD_FUNCTION(LineFollow, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-    int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
 
     while(1)

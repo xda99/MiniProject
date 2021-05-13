@@ -93,7 +93,7 @@ uint16_t extract_line_width(uint8_t *buffer)
 	else
 	{
 		last_width = width = (end - begin);
-		line_position = (begin + end)/2; //gives the line position.
+		line_position = (begin + end)/2;
 		line_not_found = LINE_FOUND;
 	}
 
