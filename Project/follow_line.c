@@ -62,7 +62,7 @@ void curve(void)
 		begin_turn=true;
 	}
 
-	//The epuck continues to go in a straight line to avoid it to turn to early
+	//The epuck continues to go in a straight line to avoid it to turn too early
 	if(!begin_turn)
 	{
 		speed_r=SPEED_EPUCK;
