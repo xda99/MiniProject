@@ -11,26 +11,31 @@
 #include <process_image.h>
 #include <colors.h>
 
-#define THRESHOLD_CURVE 				290 //number of pixels that define the beginning of a curve
-#define ROTATION 						500 //for a 180 degrees rotation
-#define TRESHOLD						10
-#define WHEEL_RAYON						40//mm
+//number of pixels that define the beginning of a curve
+#define THRESHOLD_CURVE 				290
+#define	DISTANCE_CURVATURE				40
+#define	CURVE_CORRECTION				80
+
+//To make the epuck move forward a bit when it loses the line [mm]
+#define	DISTANCE						30
 
 static bool turn=false;
 static bool right=false;
 static bool begin_turn=false;
 static bool position_done=false;
-static uint16_t speed_virage_cor = 0;
+static uint16_t speed_virage_corr = 0;
 static int16_t speed_r=0;
 static int16_t speed_l=0;
 
 
-//position_r and position_l in mm, speed in step/s
+//distance in mm, speed in step/s
 void position(float distance, int16_t speed)
 {
 	left_motor_set_pos(0);
 	speed_l=speed;
 	speed_r=speed;
+
+	//If the distance in straight line is reached, set a bool to true
 	if(left_motor_get_pos()*0.13f>distance)
 	{
 		position_done=true;
@@ -39,47 +44,57 @@ void position(float distance, int16_t speed)
 
 void curve(void)
 {
-	if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn)//Curve is on the right
+	//Curve is on the right
+	if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))>0) && !turn)
 	{
 		right=true;
 	}
-	else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn) //Curve is on the left
+	//Curve is on the left
+	else if(((get_line_position()-(IMAGE_BUFFER_SIZE/2))<0) && !turn)
 	{
 		right=false;
 	}
+
+	//Set the postion of the motors if it is the first time the function is called
 	if(!turn)
 	{
 		turn=true;
 		right_motor_set_pos(0);
 	}
 
-	if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn) //Peut commencer à tourner
+	//Set a bool to true to let the robot start to turn
+	if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn)
 	{
 		begin_turn=true;
 	}
+
+	//The epuck continues to go in a straight line until the bool begin_turn is true
 	if(!begin_turn)
 	{
 		speed_r=SPEED_EPUCK;
 		speed_l=SPEED_EPUCK;
 	}
 
-	if(right_motor_get_pos()==40)
+	//Take the distance between the center of the camera and the black line to know an
+	//approximation of the curvature of the turn
+	if(right_motor_get_pos()==DISTANCE_CURVATURE)
 	{
-		speed_virage_cor=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2)); //Speed correction
+		speed_virage_corr=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));
 	}
 
+	//Correct the speed in function of the sens of the curvature
 	if(right && turn && begin_turn)
 	{
-		speed_r=SPEED_EPUCK-2*speed_virage_cor-80;
-		speed_l=SPEED_EPUCK+2*speed_virage_cor+80;
+		speed_r=SPEED_EPUCK-2*speed_virage_corr-CURVE_CORRECTION;
+		speed_l=SPEED_EPUCK+2*speed_virage_corr+CURVE_CORRECTION;
 	}
-	else if(turn && begin_turn && !right)
+	else if(!right && turn && begin_turn)
 	{
-		speed_r=SPEED_EPUCK+2*speed_virage_cor+80;
-		speed_l=SPEED_EPUCK-2*speed_virage_cor-80;
+		speed_r=SPEED_EPUCK+2*speed_virage_corr+CURVE_CORRECTION;
+		speed_l=SPEED_EPUCK-2*speed_virage_corr-CURVE_CORRECTION;
 	}
 
-	if(get_line_not_found() == LINE_FOUND) //Ligne retrouvée
+	if(get_line_not_found() == LINE_FOUND)
 	{
 		turn=false;
 		begin_turn=false;
@@ -89,10 +104,12 @@ void curve(void)
 
 void straight_line(int16_t speed_correction)
 {
+	//Continue to move forward a little bit when the epuck lose the line
 	if((get_line_not_found() != LINE_FOUND) && !position_done)
 	{
-		position(30, SPEED_EPUCK);
+		position(DISTANCE, SPEED_EPUCK);
 	}
+
 	if(get_line_not_found() == LINE_FOUND)
 	{
 		speed_r=SPEED_EPUCK - ROTATION_COEFF * speed_correction;
@@ -106,7 +123,6 @@ static THD_FUNCTION(LineFollow, arg) {
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-    //computes the speed to give to the motors
     int16_t speed = SPEED_EPUCK;
     int16_t speed_correction = 0;
 
@@ -114,17 +130,15 @@ static THD_FUNCTION(LineFollow, arg) {
     {
     	if(!return_obstacle())
     	{
-			//computes a correction factor to let the robot rotate to be in front of the line
 			speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
-			//if the line is nearly in front of the camera, don't rotate
+			//If the line is nearly in front of the camera, don't rotate
 			if(((abs(speed_correction) < ROTATION_THRESHOLD) && !turn))
 			{
-				speed_correction = 0;
-				speed_r=speed - ROTATION_COEFF * speed_correction;
-				speed_l=speed + ROTATION_COEFF * speed_correction;
+				speed_r=SPEED_EPUCK;
+				speed_l=SPEED_EPUCK;
 			}
-			else if((get_line_width() > THRESHOLD_CURVE || turn)) //=>virage
+			else if((get_line_width() > THRESHOLD_CURVE || turn))
 			{
 				curve();
 			}
