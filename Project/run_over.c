@@ -22,7 +22,7 @@ static int16_t speed_l=0;
 
 void go_along(void)
 {
-	//playNote(440, 1000);
+	dac_play(600);
 
 	left=turn_left();
 
@@ -94,7 +94,7 @@ static THD_FUNCTION(Skirt, arg) {
 
    //Thread for the claxon!
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
-   // setSoundFileVolume(VOLUME_MAX);
+  //  setSoundFileVolume(VOLUME_MAX);
 //    dac_start();
 //    playMelodyStart();					//Pour faire une mélodie depuis le code
 
@@ -114,6 +114,8 @@ static THD_FUNCTION(Skirt, arg) {
 
     	if((get_calibrated_prox(2)>(IR_VALUE-10) || get_calibrated_prox(5)>(IR_VALUE-10)) && !obstacle_on_side)
     	{
+    		dac_stop();
+    		dac_stopI();
     		obstacle_on_side=true;
     	}
 
