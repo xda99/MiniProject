@@ -38,35 +38,46 @@ static void serial_start(void)
 
 int main(void)
 {
+	//////////////////////////////////////////////////////////////////
+	//A verifier
     halInit();
     chSysInit();
     mpu_init();
-
-    //starts the serial communication////////////A enlever?//////////
+    //Starts the serial communication
     serial_start();
-    //start the USB communication////////////A enlever?//////////
+    //Start the USB communication
     usb_start();
-    //starts the camera
+    ////////////////////////////////////////////////////////////////
+
+
+
+    //Starts the camera
     dcmi_start();
 	po8030_start();
-	//inits the motors
+	//Starts the motors
 	motors_init();
-	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	//Thread for the IR distance sensor
+	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	proximity_start();
 	calibrate_ir();
 
-	//stars the threads for the pi regulator and the processing of the image
+	//Starts the thread for the processing of the image
 	process_image_start();
+
+	//Start the line following thread
 	line_follow_start();
+
+	//Start the obstacle avoidance thread
 	skirt_start();
+
+	//Start the color detection thread
 	color_detection_start();
 
     /* Infinite loop. */
     while (1)
     {
+    	//The only function that set a speed to the motors
     	move();
-    	//waits 1 second
     	chThdYield();
     }
 }
