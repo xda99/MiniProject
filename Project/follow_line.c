@@ -1,15 +1,9 @@
-#include "ch.h"
-#include "hal.h"
-#include <math.h>
-#include <usbcfg.h>
-#include <chprintf.h>
-
-
 #include <main.h>
+#include <follow_line.h>
 #include <motors.h>
 #include <run_over.h>
 #include <process_image.h>
-#include <colors.h>
+
 
 //number of pixels that define the beginning of a curve
 #define THRESHOLD_CURVE 				290
