@@ -16,7 +16,7 @@
 uint8_t get_colors(void);
 
 /**
-* @brief   Begins the thread LineFollow
+* @brief   Begin the thread LineFollow
 */
 void color_detection_start(void);
 

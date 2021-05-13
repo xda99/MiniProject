@@ -1,19 +1,13 @@
-#include <sensors/proximity.h>
-#include <ch.h>//
-#include <hal.h>//
 #include "audio/microphone.h"
 #include "audio/mp45dt02_processing.h"
 #include <fat.h>//
 #include <audio/audio_thread.h>
-
-#include <chprintf.h>//
-#include <motors.h>
-#include <colors.h>//
-#include <main.h>
 #include <audio/play_melody.h>
+
+#include <main.h>
 #include <run_over.h>
-#include <follow_line.h>
-#include <process_image.h>//
+#include <sensors/proximity.h>
+#include <process_image.h>
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
@@ -101,7 +95,8 @@ static THD_FUNCTION(Skirt, arg) {
    //Thread for the claxon!
    // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
    // setSoundFileVolume(VOLUME_MAX);
-    playMelodyStart();					//Pour faire une mélodie depuis le code
+//    dac_start();
+//    playMelodyStart();					//Pour faire une mélodie depuis le code
 
     // - IR0 (front-right) + IR4 (back-left)
     // - IR1 (front-right-45deg) + IR5 (left)
@@ -111,11 +106,11 @@ static THD_FUNCTION(Skirt, arg) {
 
     while(1)
     {
-    	 if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side)
-    	 {
-    		 obstacle=true;
-    		 go_along();
-   	 	 }
+    	if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side)
+    	{
+    		obstacle=true;
+    		go_along();
+   	 	}
 
     	if((get_calibrated_prox(2)>(IR_VALUE-10) || get_calibrated_prox(5)>(IR_VALUE-10)) && !obstacle_on_side)
     	{

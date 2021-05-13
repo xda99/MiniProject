@@ -13,6 +13,12 @@
 #include <run_over.h>
 #include <move.h>
 
+#include "audio/microphone.h"
+#include "audio/mp45dt02_processing.h"
+#include <fat.h>//
+#include <audio/audio_thread.h>
+#include <audio/play_melody.h>
+
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
@@ -73,9 +79,12 @@ int main(void)
 	//Start the color detection thread
 	color_detection_start();
 
+	dac_start();
+
     /* Infinite loop. */
     while (1)
     {
+    	dac_play(440);
     	//The only function that set a speed to the motors
     	move();
     	chThdYield();
