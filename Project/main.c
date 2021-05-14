@@ -84,7 +84,6 @@ int main(void)
     /* Infinite loop. */
     while (1)
     {
-    	dac_play(440);
     	//The only function that set a speed to the motors
     	move();
     	chThdYield();

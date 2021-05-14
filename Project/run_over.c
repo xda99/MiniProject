@@ -22,7 +22,7 @@ static int16_t speed_l=0;
 
 void go_along(void)
 {
-//	dac_play(800);
+	dac_play(800);
 
 	left=turn_left();
 
@@ -114,7 +114,7 @@ static THD_FUNCTION(Skirt, arg) {
 
     	if((get_calibrated_prox(2)>(IR_VALUE-10) || get_calibrated_prox(5)>(IR_VALUE-10)) && !obstacle_on_side)
     	{
-//    		dac_power_speaker(0);
+    		dac_stop();
     		obstacle_on_side=true;
     	}
 

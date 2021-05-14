@@ -7,7 +7,7 @@
 void skirt_start(void);
 
 /**
-* @brief 	Rotate in the best sens when there is an obstacle in front of the epuck
+* @brief 	Rotate to the best side when there is an obstacle in front of the epuck
 * 			and turn a bool to true when the obstacle is on his side
 */
 void go_along(void);
@@ -19,7 +19,7 @@ void go_along(void);
 void rotation(int16_t direction);
 
 /**
-* @brief	Choose the best rotation sens when there is an obstacle in front of the epuck
+* @brief	Choose the best rotation side when there is an obstacle in front of the epuck
 *
 * @return	True if the epuck will turn to the left
 */
