@@ -14,7 +14,7 @@
 
 #include <colors.h>
 
-#define 	LINE_SIZE				175//40
+#define 	LINE_SIZE				100//175//40
 #define		THRESHOLD_RED			130//130//140
 #define		THRESHOLD_GREEN			24//22//27
 #define		THRESHOLD_BLUE			16
@@ -42,7 +42,7 @@ uint8_t get_colors(void)
 			green[i/2] = (((uint8_t)img_buff_ptr[i+1]&0xE0)>>5) + (((uint8_t)img_buff_ptr[i]&0x07)<<3);
 			blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 
-			if(red[i/2]>THRESHOLD_RED && green[i/2]<15)
+			if(red[i/2]>THRESHOLD_RED && green[i/2]<18)
 			{
 				compt_red+=1;
 			}
@@ -50,18 +50,18 @@ uint8_t get_colors(void)
 			{
 				compt_green+=1;
 			}
-			if(blue[i/2]>THRESHOLD_BLUE)
+			if(blue[i/2]>THRESHOLD_BLUE && red[i/2]<62)
 			{
 				compt_blue+=1;
 			}
 		}
 
-	if(compt_red>LINE_SIZE)
+	if(compt_red>LINE_SIZE-10)
 	{
 		color_detected=true;
 		return RED;
 	}
-	else if(compt_green>LINE_SIZE)
+	else if(compt_green>LINE_SIZE+20)
 	{
 		color_detected=false;
 		return GREEN;
@@ -106,8 +106,8 @@ static THD_FUNCTION(ColorDetection, arg) {
     		speed_reduction=0;
     	}
 
-    	chThdSleepMilliseconds(10);
- //   	 chThdYield();
+//    	chThdSleepMilliseconds(10);
+    	 chThdYield();
     }
 }
 
@@ -122,7 +122,7 @@ int16_t return_speed_l_c(void)
 
 void color_detection_start(void)
 {
-	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO+1, ColorDetection, NULL);
+	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO, ColorDetection, NULL);
 }
 
 bool return_color_detected(void)

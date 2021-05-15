@@ -86,7 +86,7 @@ bool turn_left(void)
 	}
 }
 
-static THD_WORKING_AREA(waSkirt, 2048);
+static THD_WORKING_AREA(waSkirt, 256);//2048
 static THD_FUNCTION(Skirt, arg) {
 
     chRegSetThreadName(__FUNCTION__);

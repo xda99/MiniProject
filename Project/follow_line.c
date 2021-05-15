@@ -4,7 +4,6 @@
 #include <run_over.h>
 #include <process_image.h>
 
-
 //number of pixels that define the beginning of a curve
 #define THRESHOLD_CURVE 				290
 #define	DISTANCE_CURVATURE				40
@@ -110,7 +109,7 @@ void straight_line(int16_t speed_correction)
 	}
 }
 
-static THD_WORKING_AREA(waLineFollow, 2048);
+static THD_WORKING_AREA(waLineFollow, 256);//2048
 static THD_FUNCTION(LineFollow, arg) {
 
     chRegSetThreadName(__FUNCTION__);
