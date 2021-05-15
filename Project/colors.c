@@ -15,14 +15,15 @@
 #include <colors.h>
 
 #define 	LINE_SIZE				100//175//40
-#define		THRESHOLD_RED			130//130//140
-#define		THRESHOLD_GREEN			24//22//27
+#define		THRESHOLD_RED			120//130//140
+#define		THRESHOLD_GREEN			21//22//24//22//27
 #define		THRESHOLD_BLUE			16
 
 static int16_t	speed_r=0;
 static int16_t	speed_l=0;
 static bool color_detected=false;
 static int16_t speed_reduction=0;
+static uint16_t compteur=0;
 
 uint8_t get_colors(void)
 {
@@ -42,7 +43,7 @@ uint8_t get_colors(void)
 			green[i/2] = (((uint8_t)img_buff_ptr[i+1]&0xE0)>>5) + (((uint8_t)img_buff_ptr[i]&0x07)<<3);
 			blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 
-			if(red[i/2]>THRESHOLD_RED && green[i/2]<18)
+			if(red[i/2]>THRESHOLD_RED && green[i/2]<16)
 			{
 				compt_red+=1;
 			}
@@ -59,12 +60,20 @@ uint8_t get_colors(void)
 	if(compt_red>LINE_SIZE-10)
 	{
 		color_detected=true;
+		chprintf((BaseSequentialStream *)&SD3,"red\n");
 		return RED;
 	}
 	else if(compt_green>LINE_SIZE+20)
 	{
-		color_detected=false;
-		return GREEN;
+		compteur+=1;
+
+		if(compteur>4000)
+		{
+			color_detected=false;
+			compteur=0;
+			chprintf((BaseSequentialStream *)&SD3,"green\n");
+			return GREEN;
+		}
 	}
 	else if(compt_blue>(LINE_SIZE-50))
 	{
@@ -72,6 +81,7 @@ uint8_t get_colors(void)
 	}
 	else
 	{
+		compteur=0;
 		return NO_COLOR;
 	}
 }

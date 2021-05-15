@@ -96,7 +96,7 @@ void curve(void)
 
 void straight_line(int16_t speed_correction)
 {
-	//Continue to move forward a little bit when the epuck lose the line
+	//Continue to move forward a little bit when the epuck loses the line
 	if((get_line_not_found() != LINE_FOUND) && !position_done)
 	{
 		position(DISTANCE, SPEED_EPUCK);
