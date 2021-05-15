@@ -1,3 +1,11 @@
+/**
+ * @file    move.c
+ * @brief	Receives from the files "follow_line", "colors" and "run_over" the speed to give to both motors
+ * 			and sets it
+ *
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
 #include <move.h>
 #include <main.h>
 #include <motors.h>

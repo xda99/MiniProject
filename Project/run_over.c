@@ -1,3 +1,10 @@
+/**
+ * @file    run_over.c
+ * @brief	Detects if there is an obstacle in front of the epuck and go along it if so
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
+
 #include "audio/microphone.h"
 #include "audio/mp45dt02_processing.h"
 #include <fat.h>//

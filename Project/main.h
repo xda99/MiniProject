@@ -1,3 +1,10 @@
+/**
+ * @file    main.h
+ * @brief   initializes the sensors and the motors and starts the threads
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
+
 #ifndef MAIN_H
 #define MAIN_H
 

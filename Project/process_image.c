@@ -1,4 +1,10 @@
-/** \This file was taken from TP4_CamReg_correction and was modified
+/**
+ * @file    process_image.c
+ * @brief	Receives an images from the camera and detect the position of the black line
+ *
+ *			Note that this file was taken from TP4_CamReg_correction and was modified
+ *
+ * @author  David Niederhauser, Valentin Roch and TP4_CamReg_correction
  */
 #include "ch.h"
 #include <process_image.h>

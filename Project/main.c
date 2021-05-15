@@ -1,3 +1,10 @@
+/**
+ * @file    main.c
+ * @brief   initializes the sensors and the motors and starts the threads
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
+
 #include "hal.h"
 #include "memory_protection.h"
 #include <usbcfg.h>
@@ -70,13 +77,13 @@ int main(void)
 	//Starts the thread for the processing of the image
 	process_image_start();
 
-	//Start the line following thread
+	//Starts the line following thread
 	line_follow_start();
 
 	//Start the obstacle avoidance thread
 	skirt_start();
 
-	//Start the color detection thread
+	//Starts the color detection thread
 	color_detection_start();
 
 	dac_start();

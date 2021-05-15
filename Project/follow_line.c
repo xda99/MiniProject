@@ -1,3 +1,9 @@
+/**
+ * @file    follow_line.c
+ * @brief   Everything that keep the robot in the center of the line
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
 #include <main.h>
 #include <follow_line.h>
 #include <motors.h>

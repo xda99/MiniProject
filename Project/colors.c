@@ -1,3 +1,10 @@
+/**
+ * @file    colors.c
+ * @brief   Receive two lines from the camera and uses mask to get the RGB values separately
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
+
 #include "ch.h"
 #include "hal.h"
 #include <chprintf.h>

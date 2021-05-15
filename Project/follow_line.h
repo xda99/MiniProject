@@ -1,3 +1,9 @@
+/**
+ * @file    follow_line.h
+ * @brief   Everything that keep the robot in the center of the line
+ *
+ * @author  David Niederhauser and Valentin Roch
+ */
 #ifndef FOLLOW_LINE_H
 #define FOLLOW_LINE_H
 
@@ -23,21 +29,21 @@ void curve(void);
 void straight_line(int16_t speed_correction);
 
 /**
-* @brief   	Return a speed for the left motor in function of the color seen
+* @brief   	Returns a speed for the left motor in function of the color seen
 *
 * @return	The static int16_t speed_l
 */
 int16_t return_speed_l_fl(void);
 
 /**
-* @brief   	Return a speed for the right motor in function of the color seen
+* @brief   	Returns a speed for the right motor in function of the color seen
 *
 * @return	The static int16_t speed_r
 */
 int16_t return_speed_r_fl(void);
 
 /**
-* @brief  Start the thread LineFollow
+* @brief  Starts the thread LineFollow
 */
 void line_follow_start(void);
 
