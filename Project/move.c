@@ -20,11 +20,11 @@ void move(void)
 		right_motor_set_speed(return_speed_r_ro());
 		left_motor_set_speed(return_speed_l_ro());
 	}
-	else if(return_color_detected())
+/*	else if(return_color_detected())
 	{
 		right_motor_set_speed(return_speed_r_c());
 		left_motor_set_speed(return_speed_l_c());
-	}
+	}*/
 	else
 	{
 		right_motor_set_speed(return_speed_r_fl()-return_speed_reduction());

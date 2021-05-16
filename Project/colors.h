@@ -42,13 +42,6 @@ int16_t return_speed_l_c(void);
 int16_t return_speed_r_c(void);
 
 /**
-* @brief	Returns the status of the bool color_detected to know in other threads that there is a specified color in front of the camera
-*
-* @return	The static bool color_detected
-*/
-bool return_color_detected(void);
-
-/**
 * @brief	Returns the speed reduction factor to go slower when there is blue
 *
 * @return	The static int16_t speed_reduction

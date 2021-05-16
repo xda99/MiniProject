@@ -5,32 +5,25 @@
  * @author  David Niederhauser and Valentin Roch
  */
 
-#include "ch.h"
 #include "hal.h"
-#include <chprintf.h>
-#include <usbcfg.h>
-
+#include <colors.h>
 #include <main.h>
 #include <camera/po8030.h>
-#include <motors.h>
-#include <run_over.h>
 
-#include <process_image.h>
-
-#include <pal.h>
-
-#include <colors.h>
-
-#define 	LINE_SIZE				100//175//40
-#define		THRESHOLD_RED			120//130//140
-#define		THRESHOLD_GREEN			21//22//24//22//27
-#define		THRESHOLD_BLUE			13//16
+#define 	LINE_SIZE				150
+#define		THRESHOLD_RED			120
+#define		THRESHOLD_RED_GREEN		16
+#define		THRESHOLD_GREEN			21
+#define		THRESHOLD_GREEN_RED		65
+#define		THRESHOLD_BLUE			13
+#define		THRESHOLD_BLUE_RED		70
+#define 	THRESHOLD_COUNTER		4000
 
 static int16_t	speed_r=0;
 static int16_t	speed_l=0;
 static bool color_detected=false;
 static int16_t speed_reduction=0;
-static uint16_t compteur=0;
+static uint16_t counter=0;
 
 uint8_t get_colors(void)
 {
@@ -38,9 +31,9 @@ static	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
 static	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
 static 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
 uint8_t *img_buff_ptr;
-uint16_t compt_red=0;
-uint16_t compt_green=0;
-uint16_t compt_blue=0;
+uint16_t counter_red=0;
+uint16_t counter_green=0;
+uint16_t counter_blue=0;
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
@@ -50,47 +43,46 @@ uint16_t compt_blue=0;
 			green[i/2] = (((uint8_t)img_buff_ptr[i+1]&0xE0)>>5) + (((uint8_t)img_buff_ptr[i]&0x07)<<3);
 			blue[i/2] = (uint8_t)img_buff_ptr[i+1]&0x1F;
 
-			if(red[i/2]>THRESHOLD_RED && green[i/2]<16)
+			if(red[i/2]>THRESHOLD_RED && green[i/2]<THRESHOLD_RED_GREEN)
 			{
-				compt_red+=1;
+				counter_red+=1;
 			}
-			if(green[i/2]>THRESHOLD_GREEN && red[i/2]<65)
+			if(green[i/2]>THRESHOLD_GREEN && red[i/2]<THRESHOLD_GREEN_RED)
 			{
-				compt_green+=1;
+				counter_green+=1;
 			}
-			if(blue[i/2]>THRESHOLD_BLUE && red[i/2]<70) //62
+			if(blue[i/2]>THRESHOLD_BLUE && red[i/2]<THRESHOLD_BLUE_RED)
 			{
-				compt_blue+=1;
+				counter_blue+=1;
 			}
 		}
 
-	if(compt_red>LINE_SIZE-10)
+	if(counter_red>LINE_SIZE)
 	{
 		color_detected=true;
-		chprintf((BaseSequentialStream *)&SD3,"red\n");
 		return RED;
 	}
-	else if(compt_green>LINE_SIZE+20)
+	else if(counter_green>LINE_SIZE)
 	{
-		compteur+=1;
+		counter+=1;
 
-		if(compteur>4000)
+		//Counter is used to be sure that the robot sees some green
+		if(counter>THRESHOLD_COUNTER)
 		{
 			color_detected=false;
-			compteur=0;
-			chprintf((BaseSequentialStream *)&SD3,"green\n");
+			counter=0;
 			return GREEN;
 		}
 	}
-	else if(compt_blue>(LINE_SIZE-50))
+	else if(counter_blue>(LINE_SIZE))
 	{
 		return BLUE;
 	}
 	else
 	{
-		compteur=0;
-		return NO_COLOR;
+		counter=0;
 	}
+	return NO_COLOR;
 }
 
 static THD_WORKING_AREA(waColorDetection, 2048);
@@ -103,27 +95,31 @@ static THD_FUNCTION(ColorDetection, arg) {
     while(1)
     {
     	uint8_t color = get_colors();
+    	static bool red=false;
 
     	if(color==RED)
     	{
-			speed_r=0;
-			speed_l=0;
+    		red=true;
+
+    		//Speed=0
+    		speed_reduction=SPEED_EPUCK;
     	}
     	else if(color==GREEN)
 		{
-			speed_r=SPEED_EPUCK;
-			speed_l=SPEED_EPUCK;
+    		red=false;
+
+    		//Speed=SPEED_EPUCK
+    		speed_reduction=0;
 		}
-    	else if(color==BLUE)
+    	else if(color==BLUE && !red)
     	{
     		speed_reduction=SPEED_EPUCK/2;
     	}
-    	else
+    	else if(!red)
     	{
     		speed_reduction=0;
     	}
 
-//    	chThdSleepMilliseconds(10);
     	 chThdYield();
     }
 }
@@ -137,17 +133,12 @@ int16_t return_speed_l_c(void)
 	return speed_l;
 }
 
-void color_detection_start(void)
-{
-	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO, ColorDetection, NULL);
-}
-
-bool return_color_detected(void)
-{
-	return color_detected;
-}
-
 int16_t return_speed_reduction(void)
 {
 	return speed_reduction;
+}
+
+void color_detection_start(void)
+{
+	chThdCreateStatic(waColorDetection, sizeof(waColorDetection), NORMALPRIO, ColorDetection, NULL);
 }
