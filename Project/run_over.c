@@ -18,7 +18,6 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
-#define		STEP_TO_MM				0.13f
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;

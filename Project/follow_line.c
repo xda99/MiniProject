@@ -10,10 +10,12 @@
 #include <run_over.h>
 #include <process_image.h>
 
-//number of pixels that define the beginning of a curve
+//Number of pixels that define the beginning of a curve
 #define THRESHOLD_CURVE 				290
+
+//Distance used to get a second value of the line position for the speed correction
 #define	DISTANCE_CURVATURE				40
-#define	CURVE_CORRECTION				80
+#define	CURVE_SPEED_CORR				80
 
 //To make the epuck move forward a bit when it loses the line [mm]
 #define	DISTANCE						30
@@ -26,8 +28,6 @@ static uint16_t speed_virage_corr = 0;
 static int16_t speed_r=0;
 static int16_t speed_l=0;
 
-
-//distance in mm, speed in step/s
 void position(float distance, int16_t speed)
 {
 	left_motor_set_pos(0);
@@ -35,7 +35,7 @@ void position(float distance, int16_t speed)
 	speed_r=speed;
 
 	//If the distance in straight line is reached, set a bool to true
-	if(left_motor_get_pos()*0.13f>distance)
+	if(left_motor_get_pos()*STEP_TO_MM>distance)
 	{
 		position_done=true;
 	}
@@ -54,42 +54,42 @@ void curve(void)
 		right=false;
 	}
 
-	//Set the postion of the motors if it is the first time the function is called
+	//Sets the position of the motors if it is the first time the function is called
 	if(!turn)
 	{
 		turn=true;
 		right_motor_set_pos(0);
 	}
 
-	//Set a bool to true to let the robot start to turn
+	//Sets a bool to true to let the robot start to turn
 	if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn)
 	{
 		begin_turn=true;
 	}
 
-	//The epuck continues to go in a straight line to avoid it to turn too early
+	//The epuck continues to go in a straight line to avoid to turn too early
 	if(!begin_turn)
 	{
 		speed_r=SPEED_EPUCK;
 		speed_l=SPEED_EPUCK;
 	}
 
-	//To know an approximation of the curvature of the turn
+	//To know an approximation of the curvature of the curve
 	if(right_motor_get_pos()==DISTANCE_CURVATURE)
 	{
 		speed_virage_corr=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));
 	}
 
-	//Correct the speed in function of the sense of the curvature
+	//Corrects the speed in function of the sense of the curvature
 	if(right && turn && begin_turn)
 	{
-		speed_r=SPEED_EPUCK-2*speed_virage_corr-CURVE_CORRECTION;
-		speed_l=SPEED_EPUCK+2*speed_virage_corr+CURVE_CORRECTION;
+		speed_r=SPEED_EPUCK-2*speed_virage_corr-CURVE_SPEED_CORR;
+		speed_l=SPEED_EPUCK+2*speed_virage_corr+CURVE_SPEED_CORR;
 	}
 	else if(!right && turn && begin_turn)
 	{
-		speed_r=SPEED_EPUCK+2*speed_virage_corr+CURVE_CORRECTION;
-		speed_l=SPEED_EPUCK-2*speed_virage_corr-CURVE_CORRECTION;
+		speed_r=SPEED_EPUCK+2*speed_virage_corr+CURVE_SPEED_CORR;
+		speed_l=SPEED_EPUCK-2*speed_virage_corr-CURVE_SPEED_CORR;
 	}
 
 	if(get_line_not_found() == LINE_FOUND)
@@ -102,7 +102,7 @@ void curve(void)
 
 void straight_line(int16_t speed_correction)
 {
-	//Continue to move forward a little bit when the epuck loses the line
+	//Continues to move forward a little bit when the epuck loses the line
 	if((get_line_not_found() != LINE_FOUND) && !position_done)
 	{
 		position(DISTANCE, SPEED_EPUCK);
@@ -115,7 +115,7 @@ void straight_line(int16_t speed_correction)
 	}
 }
 
-static THD_WORKING_AREA(waLineFollow, 256);//2048
+static THD_WORKING_AREA(waLineFollow, 256);
 static THD_FUNCTION(LineFollow, arg) {
 
     chRegSetThreadName(__FUNCTION__);
@@ -129,7 +129,7 @@ static THD_FUNCTION(LineFollow, arg) {
     	{
 			speed_correction = (get_line_position() - (IMAGE_BUFFER_SIZE/2));
 
-			//If the line is nearly in front of the camera, don't rotate
+			//Don't rotate if the epuck is almost aligned
 			if(((abs(speed_correction) < ROTATION_THRESHOLD) && !turn))
 			{
 				speed_r=SPEED_EPUCK;
