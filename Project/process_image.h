@@ -1,6 +1,6 @@
 /**
  * @file    process_image.h
- * @brief	Receives an images from the camera and detect the position of the black line
+ * @brief	Receives images from the camera and detects the position of the black line
  *
  *			Note that this file was taken from TP4_CamReg_correction and was modified
  *
