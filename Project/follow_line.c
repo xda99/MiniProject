@@ -10,15 +10,14 @@
 #include <run_over.h>
 #include <process_image.h>
 
-//Number of pixels that define the beginning of a curve
 #define THRESHOLD_CURVE 				290
-
-//Distance used to get a second value of the line position for the speed correction
 #define	DISTANCE_CURVATURE				40
 #define	CURVE_SPEED_CORR				80
-
-//To make the epuck move forward a bit when it loses the line [mm]
 #define	DISTANCE						30
+#define	STEP_TO_MM						0.13f
+#define CAMERA__DISTANCE_CORRECTION		450
+#define ROTATION_THRESHOLD				10
+#define ROTATION_COEFF					2
 
 static bool turn=false;
 static bool right=false;
@@ -61,7 +60,7 @@ void curve(void)
 		right_motor_set_pos(0);
 	}
 
-	//Sets a bool to true to let the robot start to turn
+	//Sets a bool to true to let the robot start to turn when it reaches the curvature
 	if((right_motor_get_pos()>CAMERA__DISTANCE_CORRECTION) && !begin_turn)
 	{
 		begin_turn=true;
@@ -74,7 +73,7 @@ void curve(void)
 		speed_l=SPEED_EPUCK;
 	}
 
-	//To know an approximation of the curvature of the curve
+	//Gets a second value of the line position for the speed correction
 	if(right_motor_get_pos()==DISTANCE_CURVATURE)
 	{
 		speed_virage_corr=abs(get_line_position()-(IMAGE_BUFFER_SIZE/2));

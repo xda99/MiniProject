@@ -11,6 +11,12 @@
 #include <main.h>
 #include <camera/po8030.h>
 
+#define WIDTH_SLOPE			5
+#define MIN_LINE_WIDTH		200
+#define PXTOCM				1570.0f
+#define GOAL_DISTANCE 		10.0f
+#define MAX_DISTANCE 		25.0f
+
 static uint16_t line_position = IMAGE_BUFFER_SIZE/2;
 static uint16_t lineWidth = 0;
 static uint8_t line_not_found = 0;

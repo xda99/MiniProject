@@ -1,6 +1,6 @@
 /**
  * @file    main.c
- * @brief   initializes the sensors and the motors and starts the threads
+ * @brief   Initializes the sensors and the motors and starts the threads
  *
  * @author  David Niederhauser and Valentin Roch
  */
@@ -13,7 +13,6 @@
 #include <camera/po8030.h>
 #include <sensors/proximity.h>
 #include <audio/audio_thread.h>
-
 #include <process_image.h>
 #include <follow_line.h>
 #include <colors.h>
@@ -23,7 +22,6 @@
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
-
 
 static void serial_start(void)
 {
@@ -55,7 +53,7 @@ int main(void)
 	po8030_start();
 	//Starts the motors
 	motors_init();
-	//Starts the IR distance sensor
+	//Starts the IR distance sensors
 	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	proximity_start();
 	calibrate_ir();
@@ -66,13 +64,12 @@ int main(void)
 	//Starts the line following thread
 	line_follow_start();
 
-	//Start the obstacle avoidance thread
+	//Starts the obstacle avoidance thread
 	skirt_start();
 
 	//Starts the color detection thread
 	color_detection_start();
 
-    /* Infinite loop. */
     while (1)
     {
     	//The only function that set a speed to the motors

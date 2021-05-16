@@ -18,6 +18,10 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
+//Threshold to detect if there is an obstacle
+#define 	IR_VALUE				120
+#define		KP						4
+#define		ERROR_THRESHOLD			10
 
 static bool obstacle=false;
 static bool obstacle_on_side=false;
