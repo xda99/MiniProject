@@ -1,6 +1,7 @@
 /**
  * @file    colors.c
- * @brief   Receive two lines from the camera and uses mask to get the RGB values separately
+ * @brief   Receives two lines from the camera and uses masks to get the RGB values separately
+ * 			The colors affect the speed of the robot
  *
  * @author  David Niederhauser and Valentin Roch
  */
@@ -18,22 +19,23 @@
 #define		THRESHOLD_BLUE			13
 #define		THRESHOLD_BLUE_RED		70
 #define 	THRESHOLD_COUNTER		4000
+#define 	RED			1
+#define		GREEN		2
+#define		BLUE		3
+#define		NO_COLOR	4
 
-static int16_t	speed_r=0;
-static int16_t	speed_l=0;
-static bool color_detected=false;
-static int16_t speed_reduction=0;
-static uint16_t counter=0;
+static uint8_t speed_reduction=0;
 
 uint8_t get_colors(void)
 {
-static	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
-static	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
-static 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
-uint8_t *img_buff_ptr;
-uint16_t counter_red=0;
-uint16_t counter_green=0;
-uint16_t counter_blue=0;
+	static uint16_t counter=0;
+	static	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
+	static	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
+	static 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
+	uint8_t *img_buff_ptr;
+	uint16_t counter_red=0;
+	uint16_t counter_green=0;
+	uint16_t counter_blue=0;
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
@@ -59,7 +61,6 @@ uint16_t counter_blue=0;
 
 	if(counter_red>LINE_SIZE)
 	{
-		color_detected=true;
 		return RED;
 	}
 	else if(counter_green>LINE_SIZE)
@@ -69,7 +70,6 @@ uint16_t counter_blue=0;
 		//Counter is used to be sure that the robot sees some green
 		if(counter>THRESHOLD_COUNTER)
 		{
-			color_detected=false;
 			counter=0;
 			return GREEN;
 		}
@@ -85,12 +85,11 @@ uint16_t counter_blue=0;
 	return NO_COLOR;
 }
 
-static THD_WORKING_AREA(waColorDetection, 2048);
+static THD_WORKING_AREA(waColorDetection, 256);
 static THD_FUNCTION(ColorDetection, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
-
 
     while(1)
     {
@@ -119,18 +118,8 @@ static THD_FUNCTION(ColorDetection, arg) {
     	{
     		speed_reduction=0;
     	}
-
     	 chThdYield();
     }
-}
-
-int16_t return_speed_r_c(void)
-{
-	return speed_r;
-}
-int16_t return_speed_l_c(void)
-{
-	return speed_l;
 }
 
 int16_t return_speed_reduction(void)
