@@ -1,6 +1,6 @@
 /**
  * @file    process_image.c
- * @brief	Receives an images from the camera and detect the position of the black line
+ * @brief	Receives images from the camera and detects the position of the black line
  *
  *			Note that this file was taken from TP4_CamReg_correction and was modified
  *
@@ -21,13 +21,8 @@ static uint16_t line_position = IMAGE_BUFFER_SIZE/2;
 static uint16_t lineWidth = 0;
 static uint8_t line_not_found = 0;
 
-//semaphore
 static BSEMAPHORE_DECL(image_ready_sem, TRUE);
 
-/*
- *  Returns the line's width extracted from the image buffer given
- *  Returns 0 if line not found
- */
 uint16_t extract_line_width(uint8_t *buffer)
 {
 	uint16_t i = 0, begin = 0, end = 0, width = 0;
