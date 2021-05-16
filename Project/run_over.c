@@ -2,15 +2,16 @@
  * @file    run_over.c
  * @brief	Detects if there is an obstacle in front of the epuck and go along it if so
  *
+ *	 As a reminder for the numbers of the IR sensors from the library e-puck2_main-processor/src/sensors/proximity.c
+ *   - IR0 (front-right) + IR4 (back-left)
+ *   - IR1 (front-right-45deg) + IR5 (left)
+ *   - IR2 (right) + IR6 (front-left-45deg)
+ *   - IR3 (back-right) + IR7 (front-left)
+ *
  * @author  David Niederhauser and Valentin Roch
  */
 
-#include "audio/microphone.h"
-#include "audio/mp45dt02_processing.h"
-#include <fat.h>//
 #include <audio/audio_thread.h>
-#include <audio/play_melody.h>
-
 #include <main.h>
 #include <run_over.h>
 #include <sensors/proximity.h>
@@ -18,8 +19,8 @@
 
 #define 	RIGHT					SPEED_EPUCK
 #define		LEFT					-SPEED_EPUCK
-//Threshold to detect if there is an obstacle
-#define 	IR_VALUE				120
+#define 	IR_THRESHOLD			120
+#define     FRONT_IR_THRESHOLD		(IR_THRESHOLD+10)/2
 #define		KP						4
 #define		ERROR_THRESHOLD			10
 
@@ -29,18 +30,17 @@ static bool left=false;
 static int16_t speed_r=0;
 static int16_t speed_l=0;
 
-
 void go_along(void)
 {
 	dac_play(800);
 
 	left=turn_left();
 
-	if(left && !obstacle_on_side)
+	if(left)
 	{
 		rotation(LEFT);
 	}
-	else if(!obstacle_on_side)
+	else
 	{
 		rotation(RIGHT);
 	}
@@ -48,20 +48,18 @@ void go_along(void)
 
 int16_t regulator(void)
 {
-	//	INT8?
 	int16_t error = 0;
 	int16_t speed = 0;
 
 	if(left)
 	{
-		error = (get_calibrated_prox(2)-IR_VALUE)+(get_calibrated_prox(1)-(IR_VALUE+10)/2);
+		error = (get_calibrated_prox(2)-IR_THRESHOLD)+(get_calibrated_prox(1)-FRONT_IR_THRESHOLD);
 	}
 	else
 	{
-		error = get_calibrated_prox(5)-IR_VALUE+(get_calibrated_prox(6)-(IR_VALUE+10)/2);
+		error = get_calibrated_prox(5)-IR_THRESHOLD+(get_calibrated_prox(6)-FRONT_IR_THRESHOLD);
 	}
 
-	//disables the PI regulator if the error is to small
 	if(abs(error) < ERROR_THRESHOLD)
 	{
 		return 0;
@@ -96,33 +94,24 @@ bool turn_left(void)
 	}
 }
 
-static THD_WORKING_AREA(waSkirt, 256);//2048
+static THD_WORKING_AREA(waSkirt, 256);
 static THD_FUNCTION(Skirt, arg) {
 
     chRegSetThreadName(__FUNCTION__);
     (void)arg;
 
-   //Thread for the claxon!
-   // playSoundFileStart();				//Pour faire une mélodie depuis la carte SD?!
-  //  setSoundFileVolume(VOLUME_MAX);
-//    dac_start();
-//    playMelodyStart();					//Pour faire une mélodie depuis le code
-
-    // - IR0 (front-right) + IR4 (back-left)
-    // - IR1 (front-right-45deg) + IR5 (left)
-    // - IR2 (right) + IR6 (front-left-45deg)
-    // - IR3 (back-right) + IR7 (front-left)
     int16_t speed_correction=0;
 
     while(1)
     {
-    	if((get_calibrated_prox(0)>IR_VALUE || get_calibrated_prox(7)>IR_VALUE) && !obstacle_on_side)
+    	if((get_calibrated_prox(0)>IR_THRESHOLD || get_calibrated_prox(7)>IR_THRESHOLD) && !obstacle_on_side)
     	{
     		obstacle=true;
     		go_along();
    	 	}
 
-    	if((get_calibrated_prox(2)>(IR_VALUE-10) || get_calibrated_prox(5)>(IR_VALUE-10)) && !obstacle_on_side)
+    	if((get_calibrated_prox(2)>(IR_THRESHOLD-ERROR_THRESHOLD) ||
+    		get_calibrated_prox(5)>(IR_THRESHOLD-ERROR_THRESHOLD)) && !obstacle_on_side)
     	{
     		dac_stop();
     		obstacle_on_side=true;
