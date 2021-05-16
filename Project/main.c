@@ -9,10 +9,10 @@
 #include "memory_protection.h"
 #include <usbcfg.h>
 #include <main.h>
-#include <motors.h>//////////////////////////////////////////////
+#include <motors.h>
 #include <camera/po8030.h>
-#include <chprintf.h> ///////////////////////////A enlever////////////////////////////
 #include <sensors/proximity.h>
+#include <audio/audio_thread.h>
 
 #include <process_image.h>
 #include <follow_line.h>
@@ -20,22 +20,10 @@
 #include <run_over.h>
 #include <move.h>
 
-#include "audio/microphone.h"
-#include "audio/mp45dt02_processing.h"
-#include <fat.h>//
-#include <audio/audio_thread.h>
-#include <audio/play_melody.h>
-
 messagebus_t bus;
 MUTEX_DECL(bus_lock);
 CONDVAR_DECL(bus_condvar);
 
-void SendUint8ToComputer(uint8_t* data, uint16_t size) 
-{/*
-	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)"START", 5);
-	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)&size, sizeof(uint16_t));
-	chSequentialStreamWrite((BaseSequentialStream *)&SD3, (uint8_t*)data, size);*/
-}
 
 static void serial_start(void)
 {
@@ -51,25 +39,23 @@ static void serial_start(void)
 
 int main(void)
 {
-	//////////////////////////////////////////////////////////////////
-	//A verifier
+	//HAL initialization
     halInit();
+    // Initializes the kernel
     chSysInit();
+    //This function enables the MPU
     mpu_init();
     //Starts the serial communication
     serial_start();
-    //Start the USB communication
-    usb_start();
-    ////////////////////////////////////////////////////////////////
-
-
+	//Starts the DAC module. Power of the audio amplifier and DAC peripheral
+	dac_start();
 
     //Starts the camera
     dcmi_start();
 	po8030_start();
 	//Starts the motors
 	motors_init();
-	//Thread for the IR distance sensor
+	//Starts the IR distance sensor
 	messagebus_init(&bus, &bus_lock, &bus_condvar);
 	proximity_start();
 	calibrate_ir();
@@ -85,8 +71,6 @@ int main(void)
 
 	//Starts the color detection thread
 	color_detection_start();
-
-	dac_start();
 
     /* Infinite loop. */
     while (1)

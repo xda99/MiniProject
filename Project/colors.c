@@ -24,7 +24,7 @@
 #define 	LINE_SIZE				100//175//40
 #define		THRESHOLD_RED			120//130//140
 #define		THRESHOLD_GREEN			21//22//24//22//27
-#define		THRESHOLD_BLUE			16
+#define		THRESHOLD_BLUE			13//16
 
 static int16_t	speed_r=0;
 static int16_t	speed_l=0;
@@ -34,13 +34,13 @@ static uint16_t compteur=0;
 
 uint8_t get_colors(void)
 {
-	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
-	uint8_t *img_buff_ptr;
-	uint16_t compt_red=0;
-	uint16_t compt_green=0;
-	uint16_t compt_blue=0;
+static	uint8_t red[IMAGE_BUFFER_SIZE] = {0};
+static	uint8_t green[IMAGE_BUFFER_SIZE] = {0};
+static 	uint8_t blue[IMAGE_BUFFER_SIZE] = {0};
+uint8_t *img_buff_ptr;
+uint16_t compt_red=0;
+uint16_t compt_green=0;
+uint16_t compt_blue=0;
 
 	img_buff_ptr = dcmi_get_last_image_ptr();
 
@@ -58,7 +58,7 @@ uint8_t get_colors(void)
 			{
 				compt_green+=1;
 			}
-			if(blue[i/2]>THRESHOLD_BLUE && red[i/2]<62)
+			if(blue[i/2]>THRESHOLD_BLUE && red[i/2]<70) //62
 			{
 				compt_blue+=1;
 			}
